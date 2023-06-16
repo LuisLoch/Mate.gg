@@ -1,121 +1,53 @@
-import { getDatabase, ref, push, update, onValue, get } from "firebase/database";
-import { v4 as uuidv4 } from "uuid";
-import dbconfig from "../dbconfig.mjs";
+import { getDatabase, ref, push, update, onValue, get, remove } from "firebase/database";
+import dbconfig from "../dbconfig.js";
 
 const db = getDatabase(); // Obtém a referência do banco de dados do Firebase
 
 class Notification {
-  static getNotification(id, callback) {
-    const notificationsRef = ref(db, "notifications");
+  static getAllNotifications(userId, callback) {
+    const notificationsRef = ref(db, "notifications/"+userId);
     onValue(notificationsRef, (snapshot) => {
       const notifications = snapshot.val();
-      const notification = Object.values(notifications).find((notification) => notification.id === id);
-
-      callback(notification);
+      callback(200, notifications);
     });
   }
 
-  static createnotification(notification, callback) {
-    if(!notification.data){
-      const error = {
-        message: "Too few arguments.",
-        statusCode: 400,
-      };
-      return callback(error);
+  static createNotification(userId, notification, callback) {
+    if(!userId || !notification.title || !notification.description){
+      callback(400, "Too few arguments.");
     }
+
+    notification.read = false;
 
     const notificationsRef = ref(db, "notifications");
     push(notificationsRef, notification)
       .then(() => {
-        callback(notification);
+        callback(201, "Notification created successfully.");
       })
-      .catch((error) => {
-        console.error(error);
+      .catch(() => {
+        callback(500, "Internal server error.");
       });
-  }
-
-  static updatenotification(id, updatedData, callback) {
-    const notificationsRef = ref(db, "notifications");
-    onValue(notificationsRef, (snapshot) => {
-      const notifications = snapshot.val();
-      const notification = Object.values(notifications).find((notification) => notification.id === id);
-      const notificationId = Object.keys(notifications).find((key) => notifications[key].id === id);
-      let error = null;
-  
-      if (!notification) {
-        error = {
-          message: "Notification not found.",
-          statusCode: 400,
-        };
-        return callback(error);
-      }
-  
-      const updatedNotification = {
-        ...notification,
-        ...updatedData,
-      };
-  
-      const filteredNotification = Object.fromEntries(
-        Object.entries(updatedNotification).filter(([_, value]) => value !== undefined)
-      );
-  
-      const notificationRef = ref(db, `notifications/${notificationId}`);
-      update(notificationRef, filteredNotification)
-        .then(() => {
-          callback(filteredNotification);
-        })
-        .catch(() => {
-          error = {
-            message: "Something went wrong.",
-            statusCode: 500,
-          };
-          return callback(error);
-        });
-    });
-  }
+  }  
   
   static deleteNotification(id, callback) {
-    const notificationsRef = ref(db, "notifications");
-    let error = null;
+    const notificationsRef = ref(db, "notifications/" + id);
   
     get(notificationsRef)
       .then((snapshot) => {
-        const notifications = snapshot.val();
-        const notificationKey = Object.keys(notifications).find((key) => notifications[key].id === id);
-  
-        // Verifica se o usuário existe
-        if (!notificationKey) {
-          error = {
-            message: "Notification not found.",
-            statusCode: 400,
-          };
-          return callback(error);
+        if (snapshot.exists()) {
+          remove(notificationsRef)
+            .then(() => {
+              callback(200, "Notifications deleted successfully.");
+            })
+            .catch(() => {
+              callback(500, "Error deleting notifications.");
+            });
+        } else {
+          callback(404, "Notifications not found.");
         }
-  
-        const deletedNotification = notifications[otificationKey];
-  
-        let updatedNotifications = { ...notifications };
-        delete updatedNotifications[notificationKey];
-  
-        // Atualiza os dados no banco de dados
-        set(notificationsRef, updatednotifications)
-          .then(() => {
-            callback(deletedNotification);
-          })
-          .catch(() => {
-            error = {
-              message: "Something went wrong.",
-              statusCode: 500,
-            };
-            return callback(error);
-          });
       })
       .catch(() => {
-        error = {
-          message: "Something went wrong.",
-          statusCode: 500,
-        };
-        return callback(error);
+        callback(500, "Error checking notifications exsitence.");
       });
   }
 }

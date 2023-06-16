@@ -1,5 +1,5 @@
-import { getDatabase, ref, push, update, onValue, get } from "firebase/database";
-import dbconfig from "../dbconfig.mjs";
+import { getDatabase, ref, push, update, onValue, get, remove } from "firebase/database";
+import dbconfig from "../dbconfig.js";
 
 const db = getDatabase(); // Obtém a referência do banco de dados do Firebase
 
@@ -8,121 +8,85 @@ class Game {
     const gamesRef = ref(db, "games");
     onValue(gamesRef, (snapshot) => {
       const games = snapshot.val();
-      callback(games);
+      callback(200, games);
     });
   }
 
-  static getGame(id, callback) {
-    const gamesRef = ref(db, "games");
-    onValue(gamesRef, (snapshot) => {
-      const games = snapshot.val();
-      const game = games[id];
-
-      callback(game);
+  static getGameById(id, callback) {
+    const gameRef = ref(db, "games/"+id);
+    onValue(gameRef, (snapshot) => {
+      const game = snapshot.val();
+      callback(200, game);
     });
   }
 
   static createGame(game, callback) {
-    if(!game.fields){
-      const error = {
-        message: "Too few arguments.",
-        statusCode: 400,
-      };
-      return callback(error);
+    if(!game.title || !game.description || !game.userDetails || !game.art){
+      callback(400, "Too few arguments.");
     }
 
     const gamesRef = ref(db, "games");
     push(gamesRef, game)
       .then(() => {
-        callback(game);
+        callback(201, "Game created successfully.");
       })
-      .catch((error) => {
-        console.error(error);
+      .catch(() => {
+        callback(500, "Internal server error.");
       });
   }
 
   static updateGame(id, updatedData, callback) {
-    const gamesRef = ref(db, "games");
-    onValue(gamesRef, (snapshot) => {
-      const games = snapshot.val();
-      const game = Object.values(games).find((game) => game.id === id);
-      const gameId = Object.keys(games).find((key) => games[key].id === id);
-      let error = null;
+    const gameRef = ref(db, "games/" + id);
   
-      if (!game) {
-        error = {
-          message: "Game not found.",
-          statusCode: 400,
-        };
-        return callback(error);
-      }
-  
-      const updatedGame = {
-        ...game,
-        ...updatedData,
-      };
-  
-      const filteredGame = Object.fromEntries(
-        Object.entries(updatedGame).filter(([_, value]) => value !== undefined)
-      );
-  
-      const gameRef = ref(db, `games/${gameId}`);
-      update(gameRef, filteredGame)
-        .then(() => {
-          callback(filteredGame);
-        })
-        .catch(() => {
-          error = {
-            message: "Something went wrong.",
-            statusCode: 500,
-          };
-          return callback(error);
-        });
-    });
-  }
-  
-  static deleteGame(id, callback) {
-    const gamesRef = ref(db, "games");
-    let error = null;
-  
-    get(gamesRef)
+    get(gameRef)
       .then((snapshot) => {
-        const games = snapshot.val();
-        const gameKey = Object.keys(games).find((key) => games[key].id === id);
-  
-        // Verifica se o usuário existe
-        if (!gameKey) {
-          error = {
-            message: "Game not found.",
-            statusCode: 400,
+        if (snapshot.exists()) {
+          const existingGame = snapshot.val();
+          const updatedGame = {
+            ...existingGame,
+            ...updatedData,
           };
-          return callback(error);
+  
+          const filteredGame = Object.fromEntries(
+            Object.entries(updatedGame).filter(([_, value]) => value !== undefined)
+          );
+  
+          update(gameRef, filteredGame)
+            .then(() => {
+              callback(200, "Game updated successfully.");
+            })
+            .catch(() => {
+              callback(404, "Error updating game.");
+            });
+        } else {
+          callback(404, "Game not found.");
         }
-  
-        const deletedGame = games[gameKey];
-  
-        let updatedGames = { ...games };
-        delete updatedGames[gameKey];
-  
-        // Atualiza os dados no banco de dados
-        set(gamesRef, updatedGames)
-          .then(() => {
-            callback(deletedGame);
-          })
-          .catch(() => {
-            error = {
-              message: "Something went wrong.",
-              statusCode: 500,
-            };
-            return callback(error);
-          });
       })
       .catch(() => {
-        error = {
-          message: "Something went wrong.",
-          statusCode: 500,
-        };
-        return callback(error);
+        callback(500, "Error checking game existence.");
+      });
+  }
+  
+  
+  static deleteGame(id, callback) {
+    const gameRef = ref(db, "games/" + id);
+  
+    get(gameRef)
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          remove(gameRef)
+            .then(() => {
+              callback(200, "Game deleted successfully.");
+            })
+            .catch(() => {
+              callback(500, "Error deleting game.");
+            });
+        } else {
+          callback(404, "Game not found.");
+        }
+      })
+      .catch(() => {
+        callback(500, "Error checking game exsitence.");
       });
   }
 }

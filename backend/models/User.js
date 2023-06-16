@@ -1,6 +1,5 @@
-import { getDatabase, ref, push, update, onValue, get } from "firebase/database";
-import { v4 as uuidv4 } from "uuid";
-import dbconfig from "../dbconfig.mjs";
+import { getDatabase, ref, push, update, onValue, get, remove } from "firebase/database";
+import dbconfig from "../dbconfig.js";
 
 const db = getDatabase(); // Obtém a referência do banco de dados do Firebase
 
@@ -9,126 +8,85 @@ class User {
     const usersRef = ref(db, "users");
     onValue(usersRef, (snapshot) => {
       const users = snapshot.val();
-      callback(users);
+      callback(200, users);
     });
   }
 
   static getUserById(id, callback) {
-    const usersRef = ref(db, "users");
-    onValue(usersRef, (snapshot) => {
-      const users = snapshot.val();
-      const user = Object.values(users).find((user) => user.id === id);
-
-      callback(user);
+    const userRef = ref(db, "users/"+id);
+    onValue(userRef, (snapshot) => {
+      const user = snapshot.val();
+      callback(200, user);
     });
   }
 
   static createUser(user, callback) {
-    if(!user.name || !user.birth_date || !user.email){
-      const error = {
-        message: "Too few arguments.",
-        statusCode: 400,
-      };
-      return callback(error);
+    if(!user.name || !user.birth_date || !user.email || !user.password){
+      callback(400, "Too few arguments.");
     }
-      
-    const newUser = {
-      id: uuidv4(),
-      ...user,
-    };
 
     const usersRef = ref(db, "users");
-    push(usersRef, newUser)
+    push(usersRef, user)
       .then(() => {
-        callback(newUser);
+        callback(201, "User created successfully.");
       })
-      .catch((error) => {
-        console.error(error);
+      .catch(() => {
+        callback(500, "Internal server error.");
       });
   }
 
   static updateUser(id, updatedData, callback) {
-    const usersRef = ref(db, "users");
-    onValue(usersRef, (snapshot) => {
-      const users = snapshot.val();
-      const user = Object.values(users).find((user) => user.id === id);
-      const userId = Object.keys(users).find((key) => users[key].id === id);
-      let error = null;
+    const userRef = ref(db, "users/" + id);
   
-      if (!user) {
-        error = {
-          message: "User not found.",
-          statusCode: 400,
-        };
-        return callback(error);
-      }
-  
-      const updatedUser = {
-        ...user,
-        ...updatedData,
-      };
-  
-      const filteredUser = Object.fromEntries(
-        Object.entries(updatedUser).filter(([_, value]) => value !== undefined)
-      );
-  
-      const userRef = ref(db, `users/${userId}`);
-      update(userRef, filteredUser)
-        .then(() => {
-          callback(filteredUser);
-        })
-        .catch(() => {
-          error = {
-            message: "Something went wrong.",
-            statusCode: 500,
-          };
-          return callback(error);
-        });
-    });
-  }
-  
-  static deleteUser(id, callback) {
-    const usersRef = ref(db, "users");
-    let error = null;
-  
-    get(usersRef)
+    get(userRef)
       .then((snapshot) => {
-        const users = snapshot.val();
-        const userKey = Object.keys(users).find((key) => users[key].id === id);
-  
-        // Verifica se o usuário existe
-        if (!userKey) {
-          error = {
-            message: "User not found.",
-            statusCode: 400,
+        if (snapshot.exists()) {
+          const existingUser = snapshot.val();
+          const updatedUser = {
+            ...existingUser,
+            ...updatedData,
           };
-          return callback(error);
+  
+          const filteredUser = Object.fromEntries(
+            Object.entries(updatedUser).filter(([_, value]) => value !== undefined)
+          );
+  
+          update(userRef, filteredUser)
+            .then(() => {
+              callback(200, "User updated successfully.");
+            })
+            .catch(() => {
+              callback(404, "Error updating user.");
+            });
+        } else {
+          callback(404, "User not found.");
         }
-  
-        const deletedUser = users[userKey];
-  
-        let updatedUsers = { ...users };
-        delete updatedUsers[userKey];
-  
-        // Atualiza os dados no banco de dados
-        set(usersRef, updatedUsers)
-          .then(() => {
-            callback(deletedUser);
-          })
-          .catch(() => {
-            error = {
-              message: "Something went wrong.",
-              statusCode: 500,
-            };
-            return callback(error);
-          });
       })
       .catch(() => {
-        error = {
-          message: "Something went wrong.",
-          statusCode: 500,
-        };
-        return callback(error);
+        callback(500, "Error checking user existence.");
+      });
+  }
+  
+  
+  static deleteUser(id, callback) {
+    const userRef = ref(db, "users/" + id);
+  
+    get(userRef)
+      .then((snapshot) => {
+        if (snapshot.exists()) {
+          remove(userRef)
+            .then(() => {
+              callback(200, "User deleted successfully.");
+            })
+            .catch(() => {
+              callback(500, "Error deleting user.");
+            });
+        } else {
+          callback(404, "User not found.");
+        }
+      })
+      .catch(() => {
+        callback(500, "Error checking user exsitence.");
       });
   }
 }
