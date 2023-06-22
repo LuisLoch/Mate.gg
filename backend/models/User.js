@@ -68,6 +68,8 @@ class User {
   }
   
   
+  
+  
   static deleteUser(id, callback) {
     const userRef = ref(db, "users/" + id);
   

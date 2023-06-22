@@ -1,5 +1,5 @@
 import { getDatabase, ref, push, update, onValue, get, remove } from "firebase/database";
-import Game from "../Game";
+import Game from "./Game";
 
 // Mock Firebase methods
 jest.mock("firebase/database", () => ({

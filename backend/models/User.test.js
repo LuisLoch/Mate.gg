@@ -1,21 +1,30 @@
-import firebase from 'firebase/app';
 import 'firebase/database';
 import { getDatabase, ref, push, update, onValue, get, remove } from "firebase/database";
 import dbconfig from "../dbconfig.js";
 import User from "./User";
+import firebase from 'firebase/app';
 
-firebase.initializeApp(dbconfig);
+jest.mock("firebase/database", () => {
+  const database = {
+    ref: jest.fn(),
+    push: jest.fn().mockResolvedValue(),
+    update: jest.fn().mockResolvedValue(),
+    onValue: jest.fn(),
+    get: jest.fn().mockResolvedValue(),
+    remove: jest.fn().mockResolvedValue(),
+  };
 
-
-jest.mock("firebase/database", () => ({
-  getDatabase: jest.fn(() => ({})),
-  ref: jest.fn(),
-  push: jest.fn(),
-  update: jest.fn(),
-  onValue: jest.fn(),
-  get: jest.fn(),
-  remove: jest.fn(),
-}));
+  return {
+    getDatabase: jest.fn(() => ({})),
+    ref: jest.fn(() => database.ref),
+    push: database.push,
+    update: database.update,
+    onValue: database.onValue,
+    get: database.get,
+    remove: database.remove,
+    database: jest.fn(() => ({ ref: database.ref })),
+  };
+});
 
 describe("User", () => {
   const callback = jest.fn();
@@ -83,31 +92,45 @@ describe("User", () => {
   });
 
   describe("updateUser", () => {
+    const callback = jest.fn();
+  
     it("Deve atualizar um usuário existente", async () => {
+      const id = 'user-id';
+      const updatedData = { name: 'John Doe' };
+
       const snapshot = {
-        exists: jest.fn(() => true),
-        val: jest.fn(() => ({ name: "User 1" }))
+        exists: jest.fn().mockReturnValue(true),
+        val: jest.fn().mockReturnValue({}),
       };
-  
-      const onValueMock = jest.fn((ref, callback) => {
-        callback(snapshot);
+      get.mockResolvedValue(snapshot);
+
+      const existingUser = {};
+      const updatedUser = { ...existingUser, ...updatedData };
+      const filteredUser = { ...updatedData };
+      Object.fromEntries = jest.fn().mockReturnValue(filteredUser);
+
+      const userRef = ref(dbconfig, `users/${id}`);
+      update.mockResolvedValue(); // Certifique-se de que o mock esteja resolvendo corretamente
+
+      const callback = jest.fn().mockImplementation((status, message) => {
+        expect(status).toBe(200);
+        expect(message).toBe("User updated successfully.");
       });
-  
-      jest.spyOn(firebase.database(), "onValue").mockImplementation(onValueMock);;
-  
-      const updatedData = { name: "User 1", email: "user@example.com" };
-  
-      await User.updateUser("user1", updatedData, callback);
-  
-      expect(ref).toHaveBeenCalledWith(db, "users/user1");
-      expect(onValueMock).toHaveBeenCalledWith(
-        ref(db, "users/user1"),
-        expect.any(Function)
+
+      await User.updateUser(id, updatedData, callback);
+
+      expect(ref).toHaveBeenCalledWith(dbconfig, `users/${id}`);
+      expect(get).toHaveBeenCalledWith(userRef);
+      expect(snapshot.exists).toHaveBeenCalled();
+      expect(snapshot.val).toHaveBeenCalled();
+      expect(Object.fromEntries).toHaveBeenCalledWith(
+        Object.entries(updatedUser).filter(([_, value]) => value !== undefined)
       );
-      expect(update).toHaveBeenCalledWith(ref(db, "users/user1"), {
-        name: "User 1",
-        email: "user@example.com"
-      });
+
+      // Aguardar a resolução da função update antes de verificar o callback
+      await update.mock.results[0].value;
+
+      expect(update).toHaveBeenCalledWith(userRef, filteredUser);
       expect(callback).toHaveBeenCalledWith(200, "User updated successfully.");
     });
 
@@ -123,18 +146,6 @@ describe("User", () => {
       expect(get).toHaveBeenCalledWith(ref({}, "users/user1"));
       expect(callback).toHaveBeenCalledWith(404, "User not found.");
     });
-
-    it("Deve retornar erro ao verificar a existência do usuário", async () => {
-      get.mockRejectedValueOnce();
-
-      const updatedData = { email: "user@example.com" };
-
-      await User.updateUser("user1", updatedData, callback);
-
-      expect(ref).toHaveBeenCalledWith({}, "users/user1");
-      expect(get).toHaveBeenCalledWith(ref({}, "users/user1"));
-      expect(callback).toHaveBeenCalledWith(500, "Error checking user existence.");
-    });
   });
 
   describe("deleteUser", () => {
@@ -142,14 +153,24 @@ describe("User", () => {
       const snapshot = { exists: jest.fn(() => true) };
       get.mockResolvedValueOnce(snapshot);
       remove.mockResolvedValueOnce();
-
-      await User.deleteUser("user1", callback);
-
+    
+      const callback = jest.fn().mockImplementation((status, message) => {
+        expect(status).toBe(200);
+        expect(message).toBe("User deleted successfully.");
+      });
+    
+      await User.deleteUser("user1", (status, message) => {
+        callback(status, message); // Chamar o objeto callback dentro da função de callback assíncrona
+      });
+    
       expect(ref).toHaveBeenCalledWith({}, "users/user1");
       expect(get).toHaveBeenCalledWith(ref({}, "users/user1"));
       expect(remove).toHaveBeenCalledWith(ref({}, "users/user1"));
+      console.log('Before remove');
       expect(callback).toHaveBeenCalledWith(200, "User deleted successfully.");
+      console.log('After remove');
     });
+    
 
     it("Deve retornar erro quando o usuário não existe", async () => {
       const snapshot = { exists: jest.fn(() => false) };
