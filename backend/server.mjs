@@ -1,8 +1,11 @@
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
 import User from "./models/User.js";
 import Game from "./models/Game.js";
 import Chat from "./models/Chat.js";
+
+dotenv.config();
 
 const app = express();
 
@@ -210,7 +213,7 @@ app.delete('/chats/:id', (req, res) => {
   });
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Servidor iniciado na porta ${PORT}`);
 });
