@@ -3,10 +3,9 @@ import "./Navbar.css";
 
 //components
 import { NavLink, Link } from 'react-router-dom'
-import { BsSearch, BsHouseDoorFill, BsFillPersonFill, BsFillCamerFill } from 'react-icons/bs'
+import { BsHouseDoorFill, BsFillPersonFill } from 'react-icons/bs'
 
 //hooks
-import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
