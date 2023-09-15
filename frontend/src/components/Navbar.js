@@ -3,7 +3,7 @@ import "./Navbar.css";
 
 //components
 import { NavLink, Link } from 'react-router-dom'
-import { BsHouseDoorFill, BsFillPersonFill } from 'react-icons/bs'
+import { BsHouseDoorFill, BsFillPersonFill, BsBellFill } from 'react-icons/bs'
 
 //hooks
 import { useAuth } from '../hooks/useAuth';
@@ -41,6 +41,11 @@ const Navbar = () => {
           <li>
             <NavLink to="/profile">
               <BsFillPersonFill/>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/profile">
+              <BsBellFill/>
             </NavLink>
           </li>
           <li>

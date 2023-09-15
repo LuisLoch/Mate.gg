@@ -2,8 +2,10 @@ import React from 'react'
 import './Auth.css'
 
 //components
-import {Link} from 'react-router-dom';
 import Message from '../../components/Message';
+
+//router
+import {Link} from 'react-router-dom';
 
 //hooks
 import { useState, useEffect } from 'react';

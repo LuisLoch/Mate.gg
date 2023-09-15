@@ -1,12 +1,15 @@
 import React from 'react'
 import "./Footer.css";
 
+//router
+import {Link} from 'react-router-dom';
+
 const Footer = () => {
   return (
     <footer id="footer">
-      <p>Mate.gg &copy; 2023</p>
+      <h3>Mate.gg &copy; 2023</h3>
       <br />
-      <p>Nos dê sua opinião</p>
+      <p><Link>Nos dê sua opinião</Link></p>
     </footer>
   );
 };
