@@ -17,9 +17,6 @@ export const profile = createAsyncThunk(
 
     const data = await userService.profile(user, token);
 
-    console.log("USER DATA PROFILE:");
-    console.log(data);
-
     return data;
   }
 );
@@ -29,13 +26,8 @@ export const updateProfile = createAsyncThunk(
   "user/update",
   async (user, thunkAPI) => {
     const token = thunkAPI.getState().auth.user.token;
-    console.log("userSlice data:");
-    console.log(user);
 
     const data = await userService.updateProfile(user, token);
-
-    console.log("userSlice data depois de chamar o service:");
-    console.log(data);
 
     if (data.errors) {
       return thunkAPI.rejectWithValue(data.errors[0]);
@@ -52,8 +44,6 @@ export const getUserDetails = createAsyncThunk(
     const token = thunkAPI.getState().auth.user.token;
 
     const data = await userService.getUserDetails(id, token);
-
-    console.log(data);
 
     return data;
   }

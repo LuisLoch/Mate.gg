@@ -14,9 +14,15 @@ import Navbar from "./components/Navbar"
 import Footer from "./components/Footer"
 
 //hooks
+import { useEffect, useState } from 'react';
 import {useAuth} from './hooks/useAuth'
 
+//Redux
+import { useSelector, useDispatch } from 'react-redux';
+
 function App() {
+  // const [notifications, setNotifications] = useState([]);
+  // const {user} = useSelector((state) => state.user)
   const {auth, loading} = useAuth();
 
   if(loading) {

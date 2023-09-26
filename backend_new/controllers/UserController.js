@@ -2,7 +2,7 @@
 const User = require("../models/User");
 
 //db
-const { getDatabase, ref, query, push, update, onValue, get,remove, child, orderByChild, equalTo, limitToFirst } = require("firebase/database");
+const { ref, query, push, update, get, orderByChild, equalTo } = require("firebase/database");
 const db = require("../config/db")
 
 const bcrypt = require("bcryptjs");
@@ -150,6 +150,7 @@ const getUserById = async (req, res) => {
     const user = userSnapshot.val();
     delete user.password;
     user.id = id;
+    console.log("usuário servidor: ", user)
 
     //check if user exists
     if(!user) {

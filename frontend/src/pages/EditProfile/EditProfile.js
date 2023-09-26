@@ -62,9 +62,6 @@ const EditProfile = () => {
       userData.password = password;
     }
 
-    console.log("EditProfile data:")
-    console.log(userData);
-
     // build form data
     const formData = new FormData();
 

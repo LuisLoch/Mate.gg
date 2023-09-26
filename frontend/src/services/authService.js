@@ -9,7 +9,7 @@ const register = async (data) => {
       .then((res) => res.json())
       .catch((err) => err);
 
-    if (res._id) { //PODE DAR ERRO POR CAUSA DO _id ------------------------------------------------
+    if (res) {
       localStorage.setItem("user", JSON.stringify(res));
     }
 
@@ -33,7 +33,7 @@ const login = async (data) => {
       .then((res) => res.json())
       .catch((error) => error)
 
-    if(res._id) { //PODE DAR ERRO POR CAUSA DO _id ------------------------------------------------
+    if(res) {
       localStorage.setItem("user", JSON.stringify(res));
     }
 
