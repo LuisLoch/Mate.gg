@@ -96,7 +96,7 @@ const getCurrentUser = async(req, res) => {
 
 //updates the data of an user
 const updateUser = async (req, res) => {
-  const {password, birth_date, games, } = req.body;
+  const {password, birth_date, games, region } = req.body;
 
   let photo = null;
 
@@ -128,6 +128,9 @@ const updateUser = async (req, res) => {
   }
   if(games) {
     user.games = games;
+  }
+  if(region) {
+    user.region = region;
   }
 
   //save updated user

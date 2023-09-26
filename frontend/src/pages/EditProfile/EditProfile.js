@@ -32,6 +32,7 @@ const EditProfile = () => {
 
   //Fill form with user data
   useEffect(() => {
+    console.log("Usuário: ", user)
     if(user) {
       setEmail(user.email);
       setRegion(user.region);

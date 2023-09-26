@@ -16,6 +16,7 @@ export const profile = createAsyncThunk(
     const token = thunkAPI.getState().auth.user.token;
 
     const data = await userService.profile(user, token);
+    console.log("Usuário slice: ", data);
 
     return data;
   }
