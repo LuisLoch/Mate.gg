@@ -8,27 +8,56 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useState, useEffect } from 'react';
 
 //Redux
-import { listGames } from '../../slices/gameSlice';
+import { getGames } from '../../slices/gameSlice';
+import { getUserGames, profile } from '../../slices/userSlice'
 
 //router
-import {Link} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const {games, message, error, loading} = useSelector((state) => state.game);
+  const {games} = useSelector((state) => state.game);
+  const {user, userGames} = useSelector((state) => state.user);
 
   const [gameList, setGameList] = useState(null);
+  const [userGameList, setUserGameList] = useState(null);
 
   useEffect(() => {
-    dispatch(listGames());
+    dispatch(profile());
+    dispatch(getGames());
   }, [dispatch]);
 
   useEffect(() => {
     if(games) {
       setGameList(games);
-    }    
+    }
+    console.log(gameList);
   }, [games]);
+
+  useEffect(() => {
+    dispatch(getUserGames(user.id));
+  }, [user]);
+
+  useEffect(() => {
+    if(userGames) {
+      setUserGameList(userGames);
+    }
+    console.log("userGameList: ", userGameList);
+  }, [userGames]);
+
+  const handleGameItemClick = (game) => {
+    if(Object.keys(user).length === 0) {
+      return navigate('/register');
+    }
+
+    if(!user[game.key]) {
+      return navigate(`/gameRegister?gameKey=${encodeURIComponent(JSON.stringify(game))}`);
+    }
+
+    
+  };
 
   return (
     <div id='home'>
@@ -44,11 +73,9 @@ const Home = () => {
       <div className='game-list'>
         {gameList !== null ? (
           Object.values(gameList).map((game) => (
-            <div className="game-item" key={game.name}>
-              <Link to={`/games/${encodeURIComponent(game.name)}`} className="game-item-link">
+            <div className="game-item" key={game.name} onClick={() => handleGameItemClick(game)}>
                 <img src={`${uploads}/games/${game.splashart}`} alt={game.name} className="game-item-image" />
                 <h3 className="game-item-title">{game.name}</h3>
-              </Link>
             </div>
           ))
         ) : (

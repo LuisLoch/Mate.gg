@@ -4,22 +4,21 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.3); /* Fundo escuro translúcido */
+  background-color: rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  z-index: 999; /* Coloque acima de outros elementos */
+  z-index: 999;
 }
 
 .notification-dialog {
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
-  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); */
-  max-height: 80%; /* Altura máxima do diálogo */
-  overflow-y: auto; /* Ative a rolagem vertical quando necessário */
-  width: 30%; /* Largura máxima do diálogo */
+  max-height: 80%;
+  overflow-y: auto;
+  width: 30%;
 }
 
 .notification-item {
@@ -55,7 +54,7 @@
 }
 
 .no-notifications-image {
-  width: 100px; /* Defina o tamanho desejado para a imagem */
-  height: 100px; /* Defina o tamanho desejado para a imagem */
-  margin-bottom: 10px; /* Espaço entre a imagem e o texto */
+  width: 100px;
+  height: 100px;
+  margin-bottom: 10px;
 }

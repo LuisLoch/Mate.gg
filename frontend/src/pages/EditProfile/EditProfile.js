@@ -52,7 +52,7 @@ const EditProfile = () => {
     }
 
     if(birth_date) {
-      userData.birth_date = birth_date;
+      userData.birth_date = birth_date.toString();
     }
 
     if(region) {
@@ -63,7 +63,6 @@ const EditProfile = () => {
       userData.password = password;
     }
 
-    // build form data
     const formData = new FormData();
 
     const userFormData = Object.keys(userData).forEach((key) =>

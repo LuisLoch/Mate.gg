@@ -21,7 +21,7 @@ const generateToken = (id) => {
 
 //register user and sign in
 const register = async(req, res) => {
-  const {email, password, birth_date} = req.body;
+  const {email, password} = req.body;
 
   try{
     //check if user email exists
@@ -39,7 +39,7 @@ const register = async(req, res) => {
     const passwordHash = await bcrypt.hash(password, salt);
 
     //create user
-    const newUser = new User(email, passwordHash, birth_date, "", "");
+    const newUser = new User(email, passwordHash, "", "", "");
 
     const newUserRef = push(usersRef, newUser)
     userId = newUserRef.key;
@@ -94,6 +94,18 @@ const getCurrentUser = async(req, res) => {
   res.status(200).json(user);
 }
 
+//get current logged in user games
+const getCurrentUserGames = async (req, res) => {
+  const user = req.user;
+
+  if (user && user.games) {
+    const userGames = user.games;
+    res.status(200).json(userGames);
+  } else {
+    res.status(200).json([]);
+  }
+};
+
 //updates the data of an user
 const updateUser = async (req, res) => {
   const {password, birth_date, games, region } = req.body;
@@ -110,7 +122,6 @@ const updateUser = async (req, res) => {
   const userRef = ref(db, `users/${reqUser.id}`);
   const userSnapshot = await get(userRef);
   const user = userSnapshot.val();
-  console.log(user);
   delete user.password;
 
   //update the internal user data
@@ -153,7 +164,6 @@ const getUserById = async (req, res) => {
     const user = userSnapshot.val();
     delete user.password;
     user.id = id;
-    console.log("usuário servidor: ", user)
 
     //check if user exists
     if(!user) {
@@ -171,6 +181,7 @@ module.exports = {
   register,
   login,
   getCurrentUser,
+  getCurrentUserGames,
   updateUser,
   getUserById
 }

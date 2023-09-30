@@ -8,21 +8,16 @@ import Home from "./pages/Home/Home"
 import Login from "./pages/Auth/Login"
 import Register from "./pages/Auth/Register"
 import EditProfile from "./pages/EditProfile/EditProfile"
+import GameRegister from "./pages/Game/GameRegister"
 
 //components
 import Navbar from "./components/Navbar"
 import Footer from "./components/Footer"
 
 //hooks
-import { useEffect, useState } from 'react';
 import {useAuth} from './hooks/useAuth'
 
-//Redux
-import { useSelector, useDispatch } from 'react-redux';
-
 function App() {
-  // const [notifications, setNotifications] = useState([]);
-  // const {user} = useSelector((state) => state.user)
   const {auth, loading} = useAuth();
 
   if(loading) {
@@ -35,10 +30,11 @@ function App() {
         <Navbar/>
         <div className='container'>
           <Routes>
-            <Route path='/' element={auth ? <Home/> : <Navigate to="/login"/>}/>
+            <Route path='/' element={<Home/>}/>
             <Route path='/profile' element={auth ? <EditProfile/> : <Navigate to="/login"/>}/>
             <Route path='/login' element={!auth ? <Login/> : <Navigate to="/"/>}/>
             <Route path='/register' element={!auth ? <Register/> : <Navigate to="/"/>}/>
+            <Route path='/gameRegister' element={auth ? <GameRegister/> : <Navigate to="/register"/>}/>
           </Routes>
         </div>
         <Footer/>

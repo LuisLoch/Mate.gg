@@ -16,7 +16,7 @@ import { register, reset } from '../../slices/authSlice';
 
 const Register = () => {
   const [email, setEmail] = useState("");
-  const [birth_date, setBirthDate] = useState("");
+  // const [birth_date, setBirthDate] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -29,7 +29,7 @@ const Register = () => {
 
     const user = {
       email,
-      birth_date,
+      // birth_date,
       password,
       confirmPassword
     }
@@ -49,7 +49,7 @@ const Register = () => {
     <p className='subtitle'>Crie uma conta</p>
     <form onSubmit={handleSubmit}>
       <input type="text" placeholder='Email' value={email || ""} onChange={(e) => setEmail(e.target.value)}/>
-      <input type="date" placeholder='Data de nascimento' value={birth_date || ""} onChange={(e) => setBirthDate(e.target.value)}/>
+      {/* <input type="date" placeholder='Data de nascimento' value={birth_date || ""} onChange={(e) => setBirthDate(e.target.value)}/> */}
       <input type="password" placeholder='Senha' value={password || ""} onChange={(e) => setPassword(e.target.value)}/>
       <input type="password" placeholder='Confirmação de senha' value={confirmPassword || ""} onChange={(e) => setConfirmPassword(e.target.value)}/>
       {!loading && <input type="submit" value="Cadastrar" />}

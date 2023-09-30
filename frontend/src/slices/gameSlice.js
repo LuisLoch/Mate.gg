@@ -4,14 +4,10 @@ import gameService from "../services/gameService";
 const initialState = {
   games: [],
   userInfo: [],
-  error: false,
-  success: false,
-  loading: false,
-  message: null,
 };
 
 //Get all available games
-export const listGames = createAsyncThunk(
+export const getGames = createAsyncThunk(
   "game/list",
   async (_) => {
     const data = await gameService.getGames();
@@ -21,7 +17,7 @@ export const listGames = createAsyncThunk(
 );
 
 //Get a game userInfo to create/list users
-export const userInfo = createAsyncThunk(
+export const gameUserInfo = createAsyncThunk(
   "game/userInfo",
   async (game) => {
     const data = await gameService.getGameUserInfo(game); //DEVE PEGAR A USERINFO DE TODOS OS GAMES
@@ -40,24 +36,10 @@ export const gameSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(listGames.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(listGames.fulfilled, (state, action) => {
-        state.loading = false;
-        state.success = true;
-        state.error = null;
+      .addCase(getGames.fulfilled, (state, action) => {
         state.games = action.payload;
       })
-      .addCase(userInfo.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(userInfo.fulfilled, (state, action) => {
-        state.loading = false;
-        state.success = true;
-        state.error = null;
+      .addCase(gameUserInfo.fulfilled, (state, action) => {
         state.userInfo = action.payload;
       })
   },

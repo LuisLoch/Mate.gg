@@ -28,26 +28,24 @@ const Navbar = () => {
 
   const dispatch = useDispatch();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     dispatch(logout());
     dispatch(reset());
     dispatch(resetNotifications());
-
-    navigate("/login");
+    
+    window.location.reload();
   }
 
   useEffect(() => {
     if(user) {
-      console.log("user: ", user._id)
       dispatch(listNotifications(user._id));
     }
   }, [dispatch, user]);
 
   useEffect(() => {
     if(notifications) {
-      setNotificationList(notifications)
+      setNotificationList(notifications);
     }
-    console.log("notificationList: ", notificationList)
   }, [notifications, user]);
 
 

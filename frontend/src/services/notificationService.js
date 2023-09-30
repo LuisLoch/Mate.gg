@@ -9,8 +9,6 @@ const listNotifications = async(id) => {
       .then((res) => res.json())
       .catch((err) => err);
 
-    console.log("requisição: " + api + "/users/" + id)
-
     return res.notifications;
   } catch (error) {
     console.log(error);

@@ -1,4 +1,44 @@
 const {body} = require("express-validator");
+const {isDate} = require("express-validator")
+
+const isValidDate = (dateString) => {
+  console.log("ENTROU NO TESTE: ", dateString)
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+  if (!dateRegex.test(dateString)) {
+    return false;
+  }
+
+  console.log("PASSOU TESTE DE TAMANHO")
+
+  const parts = dateString.split('-');
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10);
+  const day = parseInt(parts[2], 10);
+
+  if (isNaN(year) || isNaN(month) || isNaN(day)) {
+    return false;
+  }
+  console.log("PASSOU TESTE DE ANO")
+
+  if (month < 1 || month > 12) {
+    return false;
+  }
+  console.log("PASSOU TESTE DE MES")
+
+  const daysInMonth = new Date(year, month, 0).getDate();
+  if (day < 1 || day > daysInMonth) {
+    return false;
+  }
+  console.log("PASSOU TESTE DE DIA")
+
+  const today = new Date();
+  const minAllowedDate = new Date(today.getFullYear() - 10, today.getMonth(), today.getDate());
+
+  const inputDate = new Date(year, month - 1, day);
+  console.log("PASSOU TESTE DE DATA MAXIMA")
+  return inputDate <= minAllowedDate;
+};
 
 const userCreateValidation = () => {
   return [
@@ -8,8 +48,6 @@ const userCreateValidation = () => {
     body("password")
       .isString().withMessage("A senha é obrigatória")
       .isLength({min: 5}).withMessage("A senha precisa ter no mínimo 5 caracteres."),
-    body("birth_date")
-      .notEmpty().withMessage("A data de nascimento é obrigatória"),
     body("confirmPassword")
       .isString().withMessage("A confirmação da senha é obrigatória.")
       .custom((value, {req}) => {
@@ -33,10 +71,9 @@ const loginValidation = () => {
 
 const userUpdateValidation = () => {
   return [
-    body("name")
-      .optional().isLength({min: 3}).withMessage("O nome deve ter ao menos 3 caracteres."),
     body("password")
-      .optional().isLength({min: 5}).withMessage("A senha deve ter ao menos 5 caracteres.")
+      .optional()
+      .isLength({min: 5}).withMessage("A senha deve ter ao menos 5 caracteres."),
   ]
 }
 

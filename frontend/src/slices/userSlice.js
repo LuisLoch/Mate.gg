@@ -3,6 +3,7 @@ import userService from "../services/userService";
 
 const initialState = {
   user: {},
+  userGames: {},
   error: false,
   success: false,
   loading: false,
@@ -16,7 +17,6 @@ export const profile = createAsyncThunk(
     const token = thunkAPI.getState().auth.user.token;
 
     const data = await userService.profile(user, token);
-    console.log("Usuário slice: ", data);
 
     return data;
   }
@@ -45,6 +45,18 @@ export const getUserDetails = createAsyncThunk(
     const token = thunkAPI.getState().auth.user.token;
 
     const data = await userService.getUserDetails(id, token);
+
+    return data;
+  }
+);
+
+//Get user games
+export const getUserGames = createAsyncThunk(
+  "user/getGames",
+  async (id, thunkAPI) => {
+    const token = thunkAPI.getState().auth.user.token;
+
+    const data = await userService.getUserGames(id, token);
 
     return data;
   }
@@ -95,6 +107,16 @@ export const userSlice = createSlice({
         state.success = true;
         state.error = null;
         state.user = action.payload;
+      })
+      .addCase(getUserGames.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getUserGames.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.error = null;
+        state.userGames = action.payload;
       });
   },
 });
