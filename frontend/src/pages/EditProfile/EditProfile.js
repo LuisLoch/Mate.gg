@@ -43,8 +43,10 @@ const EditProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const userData = {
-      birth_date,
+    const userData = {}
+
+    if(birth_date) {
+      userData.birth_date = birth_date;
     }
 
     if(photo) {

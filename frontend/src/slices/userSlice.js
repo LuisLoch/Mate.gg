@@ -27,8 +27,33 @@ export const updateProfile = createAsyncThunk(
   "user/update",
   async (user, thunkAPI) => {
     const token = thunkAPI.getState().auth.user.token;
+    
+    console.log("userSlice data:");
+
+    for (const pair of user.entries()) {
+      console.log(pair[0], pair[1]);
+    }
 
     const data = await userService.updateProfile(user, token);
+
+
+    if (data.errors) {
+      return thunkAPI.rejectWithValue(data.errors[0]);
+    }
+
+    return data;
+  }
+);
+
+//Update or define a user game
+export const updateUserGame = createAsyncThunk(
+  "user/updateGame",
+  async (game, thunkAPI) => {
+    const token = thunkAPI.getState().auth.user.token;
+
+    console.log("userSlice data: ", game);
+
+    const data = await userService.updateUserGame(game, token);
 
     if (data.errors) {
       return thunkAPI.rejectWithValue(data.errors[0]);
@@ -97,6 +122,21 @@ export const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         state.user = {};
+      })
+      .addCase(updateUserGame.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateUserGame.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.error = null;
+        state.userGames = action.payload; //Deve ser implementado para que o payload traga todos os games, não somente o game atualizado
+        state.message = "Dados atualizados com sucesso!";
+      })
+      .addCase(updateUserGame.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       })
       .addCase(getUserDetails.pending, (state) => {
         state.loading = true;

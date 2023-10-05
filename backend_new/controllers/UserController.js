@@ -2,7 +2,7 @@
 const User = require("../models/User");
 
 //db
-const { ref, query, push, update, get, orderByChild, equalTo } = require("firebase/database");
+const { ref, query, push, set, update, get, orderByChild, equalTo } = require("firebase/database");
 const db = require("../config/db")
 
 const bcrypt = require("bcryptjs");
@@ -108,7 +108,7 @@ const getCurrentUserGames = async (req, res) => {
 
 //updates the data of an user
 const updateUser = async (req, res) => {
-  const {password, birth_date, games, region } = req.body;
+  const { password, birth_date, games, region } = req.body;
 
   let photo = null;
 
@@ -154,6 +154,36 @@ const updateUser = async (req, res) => {
   }
 }
 
+//updates the data of an user
+const updateCurrentUserGame = async (req, res) => {
+  const reqBody = req.body;
+  const userId = reqBody.userId;
+  const reqGame = reqBody.game;
+  delete reqBody.game;
+  delete reqBody.user;
+  console.log(reqBody);
+  console.log(userId);
+  try {
+    const game = {};
+    const userRef = ref(db, `users/${userId}/games/${reqGame}`);
+    
+    for (const key in reqBody) {
+      if (reqBody.hasOwnProperty(key)) {
+        console.log("Adicionado: ", key)
+        const value = reqBody[key];
+
+        game[key] = value;
+      }
+    }
+
+    await set(userRef, game);
+
+    res.status(200).json(game);
+  } catch (error) {
+    res.status(500).json({ errors: ["Erro ao atualizar os dados do usuário."] });
+  }
+}
+
 //get user by id
 const getUserById = async (req, res) => {
   try {
@@ -183,5 +213,6 @@ module.exports = {
   getCurrentUser,
   getCurrentUserGames,
   updateUser,
+  updateCurrentUserGame,
   getUserById
 }

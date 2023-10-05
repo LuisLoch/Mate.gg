@@ -77,8 +77,45 @@ const userUpdateValidation = () => {
   ]
 }
 
+const userUpdateGameValidation = (validations) => {
+  console.log("comecei")
+  validations.forEach(validation => {
+    console.log(validation);
+  });
+  return [
+    body("dailyOnlineTime")
+      .isString().withMessage("Insira uma janela de tempo válida.")
+      .isLength({min: 13}).withMessage("Insira uma janela de tempo válida."),
+    body("nickname")
+      .isString().withMessage("Insira um nickname válido.")
+      .isLength({min: 3}),
+    body("description")
+      .isString().withMessage("Adicione uma descrição legal para seus teammates verem.")
+      .isLength({min: 10}).withMessage("Conte um pouco mais sobre você na descrição."),
+    validations.map((validation) => {
+      switch (validation.type) {
+        case 'dailyOnlineTime':
+          return
+        case 'optionalString':
+          return body(validation.field)
+            .optional()
+            .isString().withMessage(`O campo ${validation.field} deve ser uma string.`);
+
+        case 'optionalEmail':
+          return body(validation.field)
+            .optional()
+            .isEmail().withMessage(`O campo ${validation.field} deve ser um e-mail válido.`);
+
+        default:
+          return null; // Validação padrão para tipos desconhecidos
+      }
+    }).filter(Boolean)
+  ]
+}
+
 module.exports = {
   userCreateValidation,
   loginValidation,
   userUpdateValidation,
+  userUpdateGameValidation
 }

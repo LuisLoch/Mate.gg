@@ -12,10 +12,10 @@ import { useSelector, useDispatch } from "react-redux";
 import { login, reset } from "../../slices/authSlice";
 
 const Login = () => {
+  const dispatch = useDispatch();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const dispatch = useDispatch();
 
   const { loading, error } = useSelector((state) => state.auth);
 

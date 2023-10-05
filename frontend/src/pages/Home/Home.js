@@ -22,7 +22,6 @@ const Home = () => {
   const {user, userGames} = useSelector((state) => state.user);
 
   const [gameList, setGameList] = useState(null);
-  const [userGameList, setUserGameList] = useState(null);
 
   useEffect(() => {
     dispatch(profile());
@@ -33,30 +32,22 @@ const Home = () => {
     if(games) {
       setGameList(games);
     }
-    console.log(gameList);
   }, [games]);
 
   useEffect(() => {
     dispatch(getUserGames(user.id));
-  }, [user]);
+  }, [user, dispatch]);
 
-  useEffect(() => {
-    if(userGames) {
-      setUserGameList(userGames);
-    }
-    console.log("userGameList: ", userGameList);
-  }, [userGames]);
-
-  const handleGameItemClick = (game) => {
+  const handleGameItemClick = (gameKey) => {
     if(Object.keys(user).length === 0) {
       return navigate('/register');
     }
 
-    if(!user[game.key]) {
-      return navigate(`/gameRegister?gameKey=${encodeURIComponent(JSON.stringify(game))}`);
+    if(!userGames || !Object.keys(userGames).includes(gameKey)) {
+      return navigate(`/gameRegister/${gameKey}`);
     }
 
-    
+    return navigate(`/gamePage/${gameKey}`);
   };
 
   return (
@@ -72,8 +63,9 @@ const Home = () => {
       </div>
       <div className='game-list'>
         {gameList !== null ? (
-          Object.values(gameList).map((game) => (
-            <div className="game-item" key={game.name} onClick={() => handleGameItemClick(game)}>
+          Object.entries(gameList).map(([key, game]) => (
+            key !== 'labels' &&
+            <div className="game-item" key={game.name} onClick={() => handleGameItemClick(key)}>
                 <img src={`${uploads}/games/${game.splashart}`} alt={game.name} className="game-item-image" />
                 <h3 className="game-item-title">{game.name}</h3>
             </div>

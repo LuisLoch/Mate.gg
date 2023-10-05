@@ -1,6 +1,6 @@
 import { api, requestConfig } from "../utils/config";
 
-// Get user details
+//Get user details
 const profile = async (data, token) => {
   const config = requestConfig("GET", data, token);
 
@@ -15,9 +15,15 @@ const profile = async (data, token) => {
   }
 };
 
-// Update user details
+//Update user details
 const updateProfile = async (data, token) => {
   const config = requestConfig("PUT", data, token, true);
+  console.log("requestConfig: ", config);
+  console.log("userService data:");
+  console.log(typeof data);
+  for (const pair of data.entries()) {
+    console.log(pair[0], pair[1]);
+  }
 
   try {
     const res = await fetch(api + "/users/", config)
@@ -30,7 +36,23 @@ const updateProfile = async (data, token) => {
   }
 };
 
-// Get user details
+//Update or define a user game
+const updateUserGame = async (data, token) => {
+  const config = requestConfig("PUT", data, token, false);
+  console.log("userService data: ", data.validations);
+
+  try {
+    const res = await fetch(api + "/users/games/", config)
+      .then((res) => res.json())
+      .catch((err) => err);
+
+    return res;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+//Get user details
 const getUserDetails = async (id) => {
   const config = requestConfig("GET");
 
@@ -45,7 +67,7 @@ const getUserDetails = async (id) => {
   }
 };
 
-// Get user games
+//Get user games
 const getUserGames = async (id, token) => {
   const config = requestConfig("GET", null, token);
 
@@ -63,6 +85,7 @@ const getUserGames = async (id, token) => {
 const userService = {
   profile,
   updateProfile,
+  updateUserGame,
   getUserDetails,
   getUserGames
 };

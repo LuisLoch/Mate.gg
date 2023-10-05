@@ -16,6 +16,7 @@ import Footer from "./components/Footer"
 
 //hooks
 import {useAuth} from './hooks/useAuth'
+import GamePage from './pages/Game/GamePage';
 
 function App() {
   const {auth, loading} = useAuth();
@@ -32,9 +33,10 @@ function App() {
           <Routes>
             <Route path='/' element={<Home/>}/>
             <Route path='/profile' element={auth ? <EditProfile/> : <Navigate to="/login"/>}/>
+            <Route path='/gameRegister/:game' element={auth ? <GameRegister/> : <Navigate to="/register"/>}/>
+            <Route path='/gamePage/:game' element={auth ? <GamePage/> : <Navigate to="/register"/>}/>
             <Route path='/login' element={!auth ? <Login/> : <Navigate to="/"/>}/>
             <Route path='/register' element={!auth ? <Register/> : <Navigate to="/"/>}/>
-            <Route path='/gameRegister' element={auth ? <GameRegister/> : <Navigate to="/register"/>}/>
           </Routes>
         </div>
         <Footer/>
