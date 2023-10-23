@@ -53,6 +53,7 @@ const GameRegister = () => {
       if(games[game] && games[game].name){
         setGameName(games[game].name);
         setLabels(games["labels"])
+        console.log("LABELS: ", labels)
       }
     }
   }, [games, game]);
@@ -151,14 +152,15 @@ const GameRegister = () => {
 
   return (
     <div id='game-register'>
+      {userGameInfo &&
       <div className="game-page-button" onClick={hangleGamePageButtonClick}>
-          <button><BsListCheck/> Lista de jogadores</button>
-        </div>
+        <button><BsListCheck/> Lista de jogadores</button>
+      </div>}
       <div id='game-register-form'>
         <h2>Perfil de jogo: {gameName}</h2>
         <p className='subtitle'>Informe ou altere os dados de sua conta de jogo.</p>
         <form onSubmit={handleSubmit}>
-          {gameFields && userGameInfo && Object.entries(gameFields).map(([fieldName, field], key) => (
+          {gameFields && Object.entries(gameFields).map(([fieldName, field], key) => (
             <div key={key}>
               <label>
                 <span>{labels[fieldName] || fieldName}:</span>
@@ -252,6 +254,9 @@ const GameRegister = () => {
                     value={formDataObject[fieldName] || ''}
                     onChange={handleChange}
                   >
+                    <option value={null}>
+                      Selecione
+                    </option>
                     {Object.values(field).map((value) => (
                       <option key={value} value={value}>
                         {value}

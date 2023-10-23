@@ -1,15 +1,48 @@
-/* ChatComponent.css */
-
-.chat-component {
+#chat-component {
   position: fixed;
   bottom: 20px;
   right: 20px;
   z-index: 999;
 }
 
-.chat-button {
-  width: 50px;
-  height: 50px;
+#chat-window {
+  width: 20vw;
+  height: 30vh;
+  background-color: #222;
+  border: 1px solid #888;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+#chat-icon {
+  width: calc((2.5vw + 2.5vh)/2);
+  height: calc((2.5vw + 2.5vh)/2);
+}
+
+#chat-list {
+  display: flex;
+  flex-direction: row;
+}
+
+#chat-players {
+  list-style: none;
+  width: 15%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+#chat-messages {
+  list-style: none;
+  width: 85%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+#chat-button {
+  width: 8vh;
+  height: 8vh;
   border-radius: 50%;
   background-color: #007bff;
   color: #fff;
@@ -22,18 +55,18 @@
   outline: none;
 }
 
-.chat-window {
-  width: 300px;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-.chat-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+#chat-close-button {
+  background-color: transparent;
+  color: white;
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  top: 0;
+  right: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .chat-item {
@@ -41,7 +74,20 @@
   border-bottom: 1px solid #ccc;
 }
 
-/* Estilos para o estado "fechado" do chat */
 .chat-component.closed .chat-window {
   display: none;
+}
+
+.chat-unread-messages-count {
+  font-size: calc((0.7vw + 0.7vh)/2);
+  width: calc((1.3vw + 1.3vh)/2);
+  height: calc((1.3vw + 1.3vh)/2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: red;
+  border-radius: 50%;
+  position: absolute;
+  right: 15%;
+  bottom: 15%;
 }
