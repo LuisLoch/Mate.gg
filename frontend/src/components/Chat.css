@@ -1,0 +1,47 @@
+/* ChatComponent.css */
+
+.chat-component {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 999;
+}
+
+.chat-button {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #007bff;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.chat-window {
+  width: 300px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.chat-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.chat-item {
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+/* Estilos para o estado "fechado" do chat */
+.chat-component.closed .chat-window {
+  display: none;
+}

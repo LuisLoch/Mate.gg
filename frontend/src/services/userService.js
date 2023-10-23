@@ -82,12 +82,28 @@ const getUserGames = async (id, token) => {
   }
 };
 
+//Get user games
+const getPlayers = async (gameId) => {
+  const config = requestConfig("GET");
+
+  try {
+    const res = await fetch(api + "/users/players/" + gameId, config)
+      .then((res) => res.json())
+      .catch((err) => err);
+
+    return res;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const userService = {
   profile,
   updateProfile,
   updateUserGame,
   getUserDetails,
-  getUserGames
+  getUserGames,
+  getPlayers
 };
 
 export default userService;

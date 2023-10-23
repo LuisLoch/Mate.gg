@@ -1,26 +1,121 @@
 .game-page {
+  width: 100%;
   position: relative;
   height: 80vh;
-  width: 100vw;
+  overflow: ellipsis;
+}
+
+.background-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+.game-register-button {
+  position: absolute;
+  top: 1vh;
+  right: 1vw;
+  z-index: 1;
+}
+
+.player-list {
+  border: 1px solid #000;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 60vh;
+  width: 90vw;
+  background-color: rgba(90, 90, 90, 0.8);
+}
+
+.player-list-title{
+  display: flex;
+  background-color: black;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  height: 8vh;
+  font-size: 2vh;
+  color: white;
+}
+
+.horizontal-list {
+  overflow-y: auto;
+  list-style: none;
+  justify-content: space-between;
+  margin: 0;
+  padding: 0;
+}
+
+.player-info:hover {
+  cursor: pointer;
+}
+
+.nickname-image {
+  width: auto;
+  height: 100%;
+  border-radius: 50%;
+  margin-bottom: 1em;
+}
+
+#player-info-labels,
+.player-info {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.player-info-labels-item {
+  border-bottom: 1px solid #000;
+  border-left: 1px solid #000;
+  border-right: 1px solid #000;
+  text-align: center;
+  justify-content: center;
+  flex: 2;
+  padding: 1vh 0 1vh;
+  font-weight: bold;
   overflow: hidden;
+}
 
-  .background-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: -1;
-  }
+.player-info-text-container {
+  display: flex;
+  align-items: center; /* Isso centralizará verticalmente o texto */
+}
 
-  .game-list {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    height: 60vh;
-    width: 50vw;
-    background-color: rgba(255, 255, 255, 0.8);
-  }
+.player-info-item {
+  font-size: 1em;
+  border-bottom: 1px solid #000;
+  border-left: 1px solid #000;
+  border-right: 1px solid #000;
+  text-align: center;
+  justify-content: center;
+  flex: 2;
+  padding: 1vh 0 1vh;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-height: 2em;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+
+#player-info-labels {
+  background-color: rgba(30, 30, 30, 0.8);
+}
+
+.double-space {
+  flex: 4;
+}
+
+.half-space {
+  flex: 1;
 }

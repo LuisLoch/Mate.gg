@@ -4,6 +4,7 @@ import userService from "../services/userService";
 const initialState = {
   user: {},
   userGames: {},
+  players: {},
   error: false,
   success: false,
   loading: false,
@@ -87,6 +88,16 @@ export const getUserGames = createAsyncThunk(
   }
 );
 
+//Get all available games
+export const getPlayers = createAsyncThunk(
+  "user/getPlayers",
+  async (gameId) => {
+    const data = await userService.getPlayers(gameId);
+
+    return data;
+  }
+);
+
 export const userSlice = createSlice({
   name: "user",
   initialState,
@@ -157,7 +168,10 @@ export const userSlice = createSlice({
         state.success = true;
         state.error = null;
         state.userGames = action.payload;
-      });
+      })
+      .addCase(getPlayers.fulfilled, (state, action) => {
+        state.players = action.payload;
+      })
   },
 });
 

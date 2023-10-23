@@ -17,6 +17,7 @@ import Footer from "./components/Footer"
 //hooks
 import {useAuth} from './hooks/useAuth'
 import GamePage from './pages/Game/GamePage';
+import Chat from './components/Chat';
 
 function App() {
   const {auth, loading} = useAuth();
@@ -28,6 +29,7 @@ function App() {
   return (
     <div className="App">
       <BrowserRouter>
+        <Chat/>
         <Navbar/>
         <div className='container'>
           <Routes>

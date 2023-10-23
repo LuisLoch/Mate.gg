@@ -7,7 +7,7 @@ const getGames = async() => {
   try {
     const res = await fetch(api + "/games", config)
       .then((res) => res.json())
-      .catch((err) => err)
+      .catch((err) => err);
 
     return res;
   } catch (error) {

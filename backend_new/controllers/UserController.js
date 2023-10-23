@@ -161,20 +161,30 @@ const updateCurrentUserGame = async (req, res) => {
   const reqGame = reqBody.game;
   delete reqBody.game;
   delete reqBody.user;
-  console.log(reqBody);
-  console.log(userId);
+  console.log("body: ", reqBody);
+  console.log("userId: ", userId);
   try {
     const game = {};
     const userRef = ref(db, `users/${userId}/games/${reqGame}`);
     
     for (const key in reqBody) {
       if (reqBody.hasOwnProperty(key)) {
-        console.log("Adicionado: ", key)
         const value = reqBody[key];
-
-        game[key] = value;
+        if(key != 'validations' && key != 'userId') {
+          console.log("Adicionado: ", key)
+          game[key] = value;
+        }
       }
     }
+
+    const date = new Date();
+    const minute = date.getUTCMinutes().toString().padStart(2, '0')
+    const hour = date.getUTCHours().toString().padStart(2, '0')
+    const day = date.getUTCDate().toString().padStart(2, '0');
+    const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+    const year = date.getUTCFullYear();
+
+    game['updateMoment'] = `${year}-${month}-${day} ${hour}:${minute}`;
 
     await set(userRef, game);
 
@@ -186,9 +196,9 @@ const updateCurrentUserGame = async (req, res) => {
 
 //get user by id
 const getUserById = async (req, res) => {
+  const {id} = req.params;
+  
   try {
-    const {id} = req.params;
-
     const userRef = ref(db, `users/${id}`);
     const userSnapshot = await get(userRef);
     const user = userSnapshot.val();
@@ -207,6 +217,47 @@ const getUserById = async (req, res) => {
   }
 }
 
+const getPlayerList = async(req, res) => {
+  const {gameId} = req.params;
+  console.log("GAMEID: ", gameId);
+
+  try {
+    const usersSnapshot = await get(usersRef);
+    const playerList = {};
+
+    usersSnapshot.forEach((player) => {
+      const playerData = player.val();
+      if (playerData && playerData.games[gameId]) {
+        const player = playerData.games[gameId];
+        player.region = playerData.region;
+        player.birth_date = playerData.birth_date;
+        player.photo = playerData.photo;
+        playerList[playerData.games[gameId]['nickname']] = player;
+      }
+    })
+
+    const playerArray = Object.values(playerList);
+
+    playerArray.sort((a, b) => {
+      const dateA = new Date(a.updateMoment);
+      const dateB = new Date(b.updateMoment);
+      return dateB - dateA;
+    });
+
+    const sortedPlayerList = {};
+    
+    playerArray.forEach((player) => {
+      sortedPlayerList[player.nickname] = player;
+    });
+
+    console.log("PLAYER LIST FINAL: ", sortedPlayerList)
+
+    res.status(200).json(sortedPlayerList);
+  } catch (error) {
+    res.status(500).json({errors: ["Não foi possível realizar a busca por jogadores."]});
+  }
+}
+
 module.exports = {
   register,
   login,
@@ -214,5 +265,6 @@ module.exports = {
   getCurrentUserGames,
   updateUser,
   updateCurrentUserGame,
-  getUserById
+  getUserById,
+  getPlayerList
 }
