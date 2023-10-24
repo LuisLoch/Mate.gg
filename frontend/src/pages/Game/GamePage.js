@@ -11,7 +11,7 @@ import { useState, useEffect } from 'react';
 
 //Redux
 import { getGames } from '../../slices/gameSlice';
-import { getPlayers, getUserGames } from '../../slices/userSlice'
+import { getPlayers, getUserGames, newUserChat, profile } from '../../slices/userSlice'
 
 //router
 import { useNavigate, useParams } from 'react-router-dom';
@@ -26,7 +26,7 @@ const GamePage = () => {
 
   //Store
   const { games } = useSelector((state) => state.game);
-  const { players } = useSelector((state) => state.user);
+  const { players, user } = useSelector((state) => state.user);
   const { userGames } = useSelector((state) => state.user);
   
   //useState
@@ -37,6 +37,7 @@ const GamePage = () => {
 
   //Load game and users data for the list of players
   useEffect(() => {
+    dispatch(profile())
     dispatch(getGames());
     dispatch(getPlayers(game));
     dispatch(getUserGames())
@@ -112,10 +113,14 @@ const GamePage = () => {
     return navigate(`/gameRegister/${game}`);
   }
 
-  const handlePlayerClick = (e) => {
-    e.preventDefault();
-
-    console.log("Clicou no player")
+  //Starts a chat with the clicked player
+  const handlePlayerClick = (player) => {  
+    console.log(user);
+    if(user && user.id !== player.id) {
+      console.log("Clicou no player", player.id, player.photo);
+      dispatch(newUserChat(player))
+      console.log("Setou o newUserChat")
+    }
   }
 
   const getAgeByBirthDate = (value) => {
@@ -159,11 +164,10 @@ const GamePage = () => {
                   </li>
                   {gamePlayers ? (
                     Object.entries(gamePlayers).map(([playerKey, playerData]) => {
-                      console.log("playerData: ", playerData)
-                      const orderedKeys = Object.keys(gameInfo.userInfo);
 
+                      const orderedKeys = Object.keys(gameInfo.userInfo);
                       return (
-                        <li className='player-info' key={playerKey} onClick={handlePlayerClick}>
+                        <li className='player-info' key={playerKey} onClick={() => handlePlayerClick(playerData)}>
                           {orderedKeys.map((key) => {
                             const value = playerData[key] || "N/A";
                             return (

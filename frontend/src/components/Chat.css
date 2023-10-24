@@ -1,16 +1,9 @@
+/* closed chat */
 #chat-component {
   position: fixed;
   bottom: 20px;
   right: 20px;
   z-index: 999;
-}
-
-#chat-window {
-  width: 20vw;
-  height: 30vh;
-  background-color: #222;
-  border: 1px solid #888;
-  border-radius: 5px;
   overflow: hidden;
 }
 
@@ -19,9 +12,21 @@
   height: calc((2.5vw + 2.5vh)/2);
 }
 
+/* open chat */
+
+#chat-window {
+  width: 20vw;
+  height: 30vh;
+  background-color: #222;
+  border: 1px solid #888;
+  border-radius: 5px;
+}
+
 #chat-list {
   display: flex;
   flex-direction: row;
+  height: 100%;
+  width: 100%;
 }
 
 #chat-players {
@@ -30,14 +35,49 @@
   height: 100%;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #888;
 }
 
-#chat-messages {
+#current-chat {
   list-style: none;
   width: 85%;
   height: 100%;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#current-chat-label {
+  width: auto;
+  border-bottom: 1px solid #888;
+  list-style: none;
+  height: 20%;
+  padding: 0 0 0 10px;
+  margin: 0;
+  display: flex;
+  text-align: left;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+#chat-messages {
+  list-style: none;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  overflow-y: auto;
+  flex-direction: column;
+}
+
+#message-input {
+  margin: 0;
+  max-lines: 1;
+  max-width: 100%;
 }
 
 #chat-button {
@@ -69,9 +109,51 @@
   justify-content: center;
 }
 
+#current-chat-label-image {
+  height: 80%;
+  border-radius: 50%;
+}
+
+.chat-item-time-label {
+  font-size: 0.6em;
+}
+
+.chat-players-item {
+  max-width: 100%;
+  height: auto;
+  overflow: hidden;
+  margin-bottom: 10px; /* Add some margin for spacing */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10%;
+}
+
+.chat-players-item-image {
+  max-width: 70%;
+  height: auto;
+  border-radius: 50%; /* Rounded corners */
+  overflow: hidden;
+}
+
+.chat-players-item:hover {
+  cursor: pointer;
+}
+
+.current-user-message {
+  text-align: right;
+}
+
+.other-user-message {
+  text-align: left;
+}
+
+.chat-item-border-bottom {
+  border-bottom: 1px solid #444;
+}
+
 .chat-item {
   padding: 10px;
-  border-bottom: 1px solid #ccc;
 }
 
 .chat-component.closed .chat-window {

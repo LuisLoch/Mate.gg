@@ -85,6 +85,7 @@ const getUserGames = async (id, token) => {
 //Get user games
 const getPlayers = async (gameId) => {
   const config = requestConfig("GET");
+  console.log("GAMEID: ", gameId)
 
   try {
     const res = await fetch(api + "/users/players/" + gameId, config)

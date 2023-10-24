@@ -161,8 +161,6 @@ const updateCurrentUserGame = async (req, res) => {
   const reqGame = reqBody.game;
   delete reqBody.game;
   delete reqBody.user;
-  console.log("body: ", reqBody);
-  console.log("userId: ", userId);
   try {
     const game = {};
     const userRef = ref(db, `users/${userId}/games/${reqGame}`);
@@ -171,7 +169,6 @@ const updateCurrentUserGame = async (req, res) => {
       if (reqBody.hasOwnProperty(key)) {
         const value = reqBody[key];
         if(key != 'validations' && key != 'userId') {
-          console.log("Adicionado: ", key)
           game[key] = value;
         }
       }
@@ -219,19 +216,20 @@ const getUserById = async (req, res) => {
 
 const getPlayerList = async(req, res) => {
   const {gameId} = req.params;
-  console.log("GAMEID: ", gameId);
 
   try {
     const usersSnapshot = await get(usersRef);
     const playerList = {};
 
-    usersSnapshot.forEach((player) => {
-      const playerData = player.val();
+    usersSnapshot.forEach((user) => {
+      const playerData = user.val();
+      const playerKey = user.key;
       if (playerData && playerData.games[gameId]) {
         const player = playerData.games[gameId];
         player.region = playerData.region;
         player.birth_date = playerData.birth_date;
         player.photo = playerData.photo;
+        player.id = playerKey;
         playerList[playerData.games[gameId]['nickname']] = player;
       }
     })
@@ -250,7 +248,7 @@ const getPlayerList = async(req, res) => {
       sortedPlayerList[player.nickname] = player;
     });
 
-    console.log("PLAYER LIST FINAL: ", sortedPlayerList)
+    //console.log("PLAYER LIST FINAL: ", sortedPlayerList)
 
     res.status(200).json(sortedPlayerList);
   } catch (error) {

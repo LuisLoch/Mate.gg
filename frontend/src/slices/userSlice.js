@@ -5,6 +5,7 @@ const initialState = {
   user: {},
   userGames: {},
   players: {},
+  newUserChat: {},
   error: false,
   success: false,
   loading: false,
@@ -98,6 +99,20 @@ export const getPlayers = createAsyncThunk(
   }
 );
 
+export const newUserChat = createAsyncThunk(
+  "user/newUserChat",
+  async (user) => {
+    return user;
+  }
+);
+
+export const clearNewUserChat = createAsyncThunk(
+  "user/clearNewUserChat",
+  async () => {
+    return null;
+  }
+);
+
 export const userSlice = createSlice({
   name: "user",
   initialState,
@@ -172,6 +187,13 @@ export const userSlice = createSlice({
       .addCase(getPlayers.fulfilled, (state, action) => {
         state.players = action.payload;
       })
+      .addCase(newUserChat.fulfilled, (state, action) => {
+        state.newUserChat = action.payload;
+      })
+      .addCase(clearNewUserChat.fulfilled, (state, action) => {
+        state.newUserChat = null;
+        state.newUserChatPhoto = null;
+      });
   },
 });
 
