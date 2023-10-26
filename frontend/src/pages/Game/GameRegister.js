@@ -114,6 +114,54 @@ const GameRegister = () => {
     console.log(formDataObject);
   };
 
+  const handleLolMainsChange = (e, index) => {
+    const { name, value } = e.target;
+    
+    var currentMains = formDataObject['mains'];
+
+    if (!currentMains) {
+      setFormDataObject({ ...formDataObject, [name]: value})
+      console.log("mains: ", formDataObject['mains'])
+      return;
+    }
+
+    const mainsArray = currentMains.split(', ');
+
+    if(mainsArray.length === 1) {
+      console.log("FormDataObject tem 1 mains")
+      if(index === 0) {
+        setFormDataObject({ ...formDataObject, [name]: value})
+      } else {
+        const newMains = `${mainsArray[0]}, ${value}`;
+        setFormDataObject({ ...formDataObject, [name]: newMains})
+      }
+    } else if (mainsArray.length === 2) {
+      console.log("FormDataObject tem 1 mains")
+      if(index === 0) {
+        const newMains = `${value}, ${mainsArray[1]}`
+        setFormDataObject({ ...formDataObject, [name]: newMains})
+      } else if(index === 1) {
+        const newMains = `${mainsArray[0]}, ${value}`
+        setFormDataObject({ ...formDataObject, [name]: newMains})
+      } else if(index === 2) {
+        const newMains = `${mainsArray[0]}, ${mainsArray[1]}, ${value}`
+        setFormDataObject({ ...formDataObject, [name]: newMains})
+      }
+    } else if (mainsArray.length === 3) {
+      console.log("FormDataObject tem 1 mains")
+      if(index === 0) {
+        const newMains = `${value}, ${mainsArray[1]}, ${mainsArray[2]}`
+        setFormDataObject({ ...formDataObject, [name]: newMains})
+      } else if(index === 1) {
+        const newMains = `${mainsArray[0]}, ${value}, ${mainsArray[2]}`
+        setFormDataObject({ ...formDataObject, [name]: newMains})
+      } else if(index === 2) {
+        const newMains = `${mainsArray[0]}, ${mainsArray[1]}, ${value}`
+        setFormDataObject({ ...formDataObject, [name]: newMains})
+      }
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -230,6 +278,28 @@ const GameRegister = () => {
                         </select>
                       </div>
                     </div>
+                  </div>
+                ) : typeof field == typeof [] && fieldName === 'mains' ? (
+                  <div id='lol-mains'>
+                    {Array(3).fill().map((_, index) => (
+                      <select
+                        id={fieldName}
+                        className='lol-main-selector'
+                        key={`${fieldName}-${index}`}
+                        name={fieldName}
+                        value={(formDataObject[fieldName] && formDataObject[fieldName].split(', ')[index]) || ''}
+                        onChange={(e) => handleLolMainsChange(e, index)}
+                      >
+                        <option value={null}>
+                          Selecione
+                        </option>
+                        {Object.values(field).map((value) => (
+                          <option key={value} value={value}>
+                            {value}
+                          </option>
+                        ))}
+                      </select>
+                    ))}
                   </div>
                 ) : field === 'Integer' ? (
                   <input

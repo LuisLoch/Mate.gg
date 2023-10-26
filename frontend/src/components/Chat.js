@@ -194,17 +194,11 @@ const Chat = () => {
                   if (key != 'photo') {
                     const currentMessage = chatMessages[messageId][key];
                     const isCurrentUserMessage = currentMessage.sender === userId;
-                    const nextMessageKey = messageIds[index + 1];
-                    const nextMessage = nextMessageKey ? chatMessages[messageId][nextMessageKey] : null;
-                    const shouldAddBorderCase1 = isCurrentUserMessage && nextMessage.sender !== user;
-                    const shouldAddBorderCase2 = !isCurrentUserMessage && nextMessage.sender === user;
-                    const shouldAddBorderClass = nextMessage && nextMessage.sender !== userId;
-  
+                    
                     return(
                       <li
                         key={key}
-                        className={`chat-item ${isCurrentUserMessage ? 'current-user-message' : 'other-user-message'}
-                        ${shouldAddBorderClass ? 'chat-item-border-bottom' : ''}`}
+                        className={`chat-item ${isCurrentUserMessage ? 'current-user-message' : 'other-user-message'}`}
                       >
                         <p className='chat-item-time-label'>{getDateFromMilliseconds(key)}</p>
                         {currentMessage.message}
