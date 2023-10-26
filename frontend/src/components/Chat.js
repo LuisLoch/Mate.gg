@@ -24,7 +24,7 @@ const Chat = () => {
   const [socket, setSocket] = useState(null);
 
   const [isOpen, setIsOpen] = useState(false);
-  const [unreadMessagesCount, setUnreadMessagesCount] = useState(1);
+  const [unreadMessages, setUnreadMessages] = useState(false);
   const [chatMessages, setChatMessages] = useState({});
   const [messageId, setMessageId] = useState(null);
   const [newMessage, setNewMessage] = useState(null);
@@ -65,6 +65,7 @@ const Chat = () => {
       socket.on('messages', (messages) => {
         console.log("chatMessages: ", messages)
         setChatMessages(messages); //Sets the chatMessages with the messages received from the server
+        setUnreadMessages(messages.notification)
         if(!messageId) { //If the chat has no messageId to list the messages from a single user
           setMessageId(Object.keys(messages)[0]); //Sets the messageId from the first element of the messages
         }
@@ -93,8 +94,9 @@ const Chat = () => {
 
   //Toggle open/close chat
   const toggleChat = () => {
-    if(user.email) {
+    if(user.email && socket) {
       setIsOpen(!isOpen);
+      socket.emit('notify', {user: user.id, value: false})
     }
   };
 
@@ -169,14 +171,16 @@ const Chat = () => {
           <div id='chat-list'>
             <ul id='chat-players'>
               {chatMessages && messageId && Object.keys(chatMessages).map((key, index, messageIds) => (
-                <li className="chat-players-item" key={key}>
-                  <img
-                    src={chatMessages[key].photo ? `${uploads}/users/${chatMessages[key].photo}` : `${uploads}/users/user.png`}
-                    alt={`user-${key}-photo`}
-                    className="chat-players-item-image"
-                    onClick={() => handleChatPlayerClick(key)}
-                  />
-                </li>
+                key !== 'notification' && (
+                  <li className="chat-players-item" key={key}>
+                    <img
+                      src={chatMessages[key].photo ? `${uploads}/users/${chatMessages[key].photo}` : `${uploads}/users/user.png`}
+                      alt={`user-${key}-photo`}
+                      className="chat-players-item-image"
+                      onClick={() => handleChatPlayerClick(key)}
+                    />
+                  </li>
+                )
               ))}
             </ul>
             <div id="current-chat">
@@ -191,7 +195,7 @@ const Chat = () => {
               </div>
               <ul id="chat-messages" ref={chatMessagesRef}>
                 {chatMessages && chatMessages[messageId] && Object.keys(chatMessages[messageId]).map((key, index, messageIds) => {
-                  if (key != 'photo') {
+                  if (key !== 'photo') {
                     const currentMessage = chatMessages[messageId][key];
                     const isCurrentUserMessage = currentMessage.sender === userId;
                     
@@ -226,9 +230,11 @@ const Chat = () => {
       ) : (
         <button id="chat-button" onClick={toggleChat}>
           <BsChatDots id='chat-icon'/>
-          <div className='chat-unread-messages-count'>
-            {unreadMessagesCount}
-          </div>
+          {unreadMessages &&
+            <div className='chat-unread-messages'>
+              <img src={`${uploads}/exclamation_mark.png`} alt="chat-exclamation-mark" id='chat-exclamation-mark'/>
+            </div>
+          }
         </button>
       )}
     </div>

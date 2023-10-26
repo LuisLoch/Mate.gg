@@ -161,7 +161,7 @@
   display: none;
 }
 
-.chat-unread-messages-count {
+.chat-unread-messages {
   font-size: calc((0.7vw + 0.7vh)/2);
   width: calc((1.3vw + 1.3vh)/2);
   height: calc((1.3vw + 1.3vh)/2);
@@ -173,4 +173,8 @@
   position: absolute;
   right: 15%;
   bottom: 15%;
+}
+
+#chat-exclamation-mark {
+  height: 100%;
 }

@@ -20,13 +20,6 @@ async function setMessageAndPhoto(ref, sender, messageId, message, photo) {
 }
 
 async function sendMessage({ message, sender, receiver, senderPhoto, receiverPhoto }) {
-  console.log("Service: ");
-  console.log("message: ", message);
-  console.log("sender: ", );
-  console.log("receiver: ", );
-  console.log("senderPhoto: ", );
-  console.log("Service: ", );
-
   if (sender && receiver && senderPhoto) {
     const receiverMessagesRef = admin.database().ref(`users/${receiver}/messages/${sender}`);
     const senderMessagesRef = admin.database().ref(`users/${sender}/messages/${receiver}`);
@@ -34,6 +27,8 @@ async function sendMessage({ message, sender, receiver, senderPhoto, receiverPho
     
     setMessageAndPhoto(receiverMessagesRef, sender, messageId, message, senderPhoto);
     setMessageAndPhoto(senderMessagesRef, sender, messageId, message, receiverPhoto);
+
+    setMessageNotification({user: receiver, value: true});
   } else {
     console.error('Valores ausentes. Não é possível iniciar o chat.');
   }
@@ -54,4 +49,9 @@ async function getMessages(user) {
     });
 }
 
-module.exports = { sendMessage, getMessages };
+async function setMessageNotification({user, value}) {
+  const notificationRef = admin.database().ref(`users/${user}/messages/notification`);
+  notificationRef.set(value);
+}
+
+module.exports = { sendMessage, getMessages, setMessageNotification };

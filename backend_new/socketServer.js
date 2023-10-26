@@ -1,7 +1,7 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-const { sendMessage, getMessages } = require('./firebase');
+const { sendMessage, getMessages, setMessageNotification } = require('./firebase');
 const cors = require('cors');
 
 const app = express();
@@ -45,6 +45,15 @@ io.on('connection', (socket) => {
     console.log("Lista de usuários logados: ", users)
   });
 
+  socket.on('notify', ({user, value}) => {
+    setMessageNotification({user: user, value: value})
+    const targetSocketId = Object.keys(users).find((key) => users[key] === user);
+    if (targetSocketId) {
+      console.log("Notificações atualizadas do usuário recebedor: ", targetSocketId);
+      io.to(targetSocketId).emit('refresh');
+    }
+  })
+
   //Send the first message to another user
   socket.on('start-chat', ({targetUser, userPhoto, targetPhoto}) => {
     const user = users[socket.id];
@@ -54,11 +63,6 @@ io.on('connection', (socket) => {
     }
 
     if(user && targetUser && userPhoto && targetPhoto) {
-      console.log("Criou o chat entre os jogadores.");
-      console.log("user: ", user);
-      console.log("targetUser: ", targetUser);
-      console.log("userPhoto: ", userPhoto);
-      console.log("targetPhoto: ", targetPhoto);
       sendMessage({message: null, sender: user, receiver: targetUser, senderPhoto: userPhoto, receiverPhoto: targetPhoto});
     }
 
@@ -81,12 +85,6 @@ io.on('connection', (socket) => {
       socket.emit('login-necessary');
       return;
     }
-
-    console.log("Lista de elementos da mensagem:")
-    console.log(message)
-    console.log(user)
-    console.log(targetUser)
-    console.log(userPhoto)
 
     if(message && user && targetUser && userPhoto) {
       console.log("Enviou uma mensagem.");
