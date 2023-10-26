@@ -1,3 +1,4 @@
+
 /* closed chat */
 #chat-component {
   position: fixed;
@@ -16,7 +17,7 @@
 
 #chat-window {
   width: 20vw;
-  height: 30vh;
+  height: 40vh;
   background-color: #222;
   border: 1px solid #888;
   border-radius: 5px;
@@ -32,6 +33,7 @@
 #chat-players {
   list-style: none;
   width: 15%;
+  min-width: 30px;
   height: 100%;
   padding: 0;
   margin: 0;
@@ -58,7 +60,6 @@
   padding: 0 0 0 10px;
   margin: 0;
   display: flex;
-  text-align: left;
   align-items: center;
   justify-content: center;
   font-weight: bold;

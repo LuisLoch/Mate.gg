@@ -7,43 +7,36 @@ admin.initializeApp({
   databaseURL: 'https://mategg-c5508-default-rtdb.firebaseio.com/',
 });
 
-//Send the first message message from an user to another
-async function startChat(userSend, userReceive, message, userPhoto, targetPhoto) {
-  console.log("FOTOS: ", userPhoto, targetPhoto)
-  const timestamp = Date.now();
-  const messageId = timestamp.toString();
-  const messagesRefReceiver = admin.database().ref(`users/${userReceive}/messages/${userSend}/${messageId}`);
-  messagesRefReceiver.set({
-    sender: userSend,
-    message: message,
-  });
-  const messagesRefReceiverPhoto = admin.database().ref(`users/${userReceive}/messages/${userSend}/photo`);
-  messagesRefReceiverPhoto.set({targetPhoto})
-
-  const messagesRefSender = admin.database().ref(`users/${userSend}/messages/${userReceive}/${messageId}`);
-  messagesRefSender.set({
-    sender: userSend,
-    message: message,
-  });
-  const messagesRefSenderPhoto = admin.database().ref(`users/${userSend}/messages/${userReceive}/photo`);
-  messagesRefSenderPhoto.set({userPhoto});
+async function setMessageAndPhoto(ref, sender, messageId, message, photo) {
+  if(message && messageId) {
+    ref.child(messageId).set({
+      sender,
+      message,
+    });
+  }
+  if(photo) {
+    ref.child('photo').set(photo);
+  }
 }
 
-//Send a message from an user to another
-async function sendMessage(userSend, userReceive, message) {
-  const timestamp = Date.now();
-  const messageId = timestamp.toString();
-  const messagesRefReceiver = admin.database().ref(`users/${userReceive}/messages/${userSend}/${messageId}`);
-  messagesRefReceiver.set({
-    sender: userSend,
-    message: message,
-  });
+async function sendMessage({ message, sender, receiver, senderPhoto, receiverPhoto }) {
+  console.log("Service: ");
+  console.log("message: ", message);
+  console.log("sender: ", );
+  console.log("receiver: ", );
+  console.log("senderPhoto: ", );
+  console.log("Service: ", );
 
-  const messagesRefSender = admin.database().ref(`users/${userSend}/messages/${userReceive}/${messageId}`);
-  messagesRefSender.set({
-    sender: userSend,
-    message: message,
-  });
+  if (sender && receiver && senderPhoto) {
+    const receiverMessagesRef = admin.database().ref(`users/${receiver}/messages/${sender}`);
+    const senderMessagesRef = admin.database().ref(`users/${sender}/messages/${receiver}`);
+    const messageId = Date.now().toString();
+    
+    setMessageAndPhoto(receiverMessagesRef, sender, messageId, message, senderPhoto);
+    setMessageAndPhoto(senderMessagesRef, sender, messageId, message, receiverPhoto);
+  } else {
+    console.error('Valores ausentes. Não é possível iniciar o chat.');
+  }
 }
 
 //Get all user messages
@@ -61,4 +54,4 @@ async function getMessages(user) {
     });
 }
 
-module.exports = { sendMessage, getMessages, startChat };
+module.exports = { sendMessage, getMessages };

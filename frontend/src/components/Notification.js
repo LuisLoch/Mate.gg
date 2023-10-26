@@ -24,7 +24,7 @@ const Notification = ({ notifications, onClose }) => {
             </div>
         }
       </div>
-      <button className='close-button' onClick={onClose}>
+      <button className='notification-close-button' onClick={onClose}>
         Fechar
       </button>
     </div>

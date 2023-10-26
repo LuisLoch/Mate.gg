@@ -17,7 +17,7 @@ import { clearNewUserChat, profile } from '../slices/userSlice';
 const Chat = () => {
   const dispatch = useDispatch();
 
-  const {user, newUserChat, newUserChatPhoto} = useSelector((state) => state.user);
+  const {user, newUserChat} = useSelector((state) => state.user);
 
   const chatMessagesRef = useRef(null);
 
@@ -34,7 +34,7 @@ const Chat = () => {
     dispatch(profile());
   }, [dispatch])
 
-  //Create and set the socket variable, and sets the disconnection from socket when the component is dismounted
+  //Creates and sets the socket variable, and sets the disconnection from socket when the component is dismounted
   useEffect(() => {
     const newSocket = io('http://localhost:4000', {
       withCredentials: true,
@@ -48,33 +48,45 @@ const Chat = () => {
     };
   }, []);
 
-  //Set the userId variable when the store returns the user object
+  //Sets the userId variable when the Redux store returns the user object
   useEffect(() => {
     if (user) {
       setUserId(user.id);
     }
   }, [user]);
 
-  //Joins the client in the server when the socket and the userId are ready
+  //useEffect for when the userId or the socket variable change
   useEffect(() => {
-    if (userId && socket) {
+    if (userId && socket) { //Emits a get-messages, when the socket or the userId changes, and only if they exist
       socket.emit('join', userId);
-    }
-  }, [userId, socket]);
-
-  //Emits the command to search for messages and sets the manipulator to when messages are received
-  useEffect(() => {
-    if (userId && socket) {
       socket.emit('get-messages');
+ 
+      //If the server emits a message
       socket.on('messages', (messages) => {
-        setChatMessages(messages);
+        console.log("chatMessages: ", messages)
+        setChatMessages(messages); //Sets the chatMessages with the messages received from the server
+        if(!messageId) { //If the chat has no messageId to list the messages from a single user
+          setMessageId(Object.keys(messages)[0]); //Sets the messageId from the first element of the messages
+        }
       });
+
+      //If the server emits a refresh message
+      socket.on('refresh', () => {
+        socket.emit('get-messages'); //Refreshes the user messages
+      });
+
+      //If the server requires login for some reason
+      socket.on('login-necessary', () => {
+        console.log("SERVIDOR REQUISITOU LOGIN")
+        socket.emit('join', userId); //Log the current user in the server
+      })
     } 
 
     return () => { //Sets the manipulator off when the component gets dismounted
       if (socket) {
         socket.off('messages');
-
+        socket.off('refresh');
+        socket.off('login-necessary');
       }
     };
   }, [userId, socket]);
@@ -88,20 +100,26 @@ const Chat = () => {
 
   //Scrolls the chat till the end when it opens
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && chatMessages) {
       chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
     }
-  }, [isOpen]);
+  }, [isOpen, chatMessages]);
 
-  //Starts a new chat with an user
+  //useEffect for when the newUserChat variable from Redux store changes
   useEffect(() => {
-    console.log("NEW USER CHAT MUDOU: ", newUserChat)
-    if(newUserChat && socket) {
-      console.log("INICIOU UM NOVO CHAT!")
-      console.log("NEW USER CHAT: ", newUserChat)
-      socket.emit('start-chat', { message: 'Olá, vamos jogar!', targetUser: newUserChat.id, userPhoto: user.photo, targetPhoto: newUserChat.photo});
-      dispatch(clearNewUserChat());
+    if (newUserChat && socket) { //If a newUserChat and a socket exist
+      var canStartChat = true;
+      Object.keys(chatMessages).forEach((key) => { //Only starts the chat if there is no other messageId equal to the newUserChat.id
+        if(key == newUserChat.id) {
+          canStartChat = false;
+        }
+      })
+      if(canStartChat == true) {
+        console.log("INICIOU UM NOVO CHAT: ", newUserChat)
+        socket.emit('start-chat', { targetUser: newUserChat.id, userPhoto: user.photo, targetPhoto: newUserChat.photo});
+      }
     }
+    dispatch(clearNewUserChat());
   }, [newUserChat])
 
   //Handles a message change for the message input
@@ -112,7 +130,6 @@ const Chat = () => {
   //Handles a player in the chat click
   const handleChatPlayerClick = (playerId) => {
     setMessageId(playerId)
-    console.log("MessageId: ", messageId)
   };
 
   //Handles a message submit from the message input
@@ -120,7 +137,7 @@ const Chat = () => {
     if(socket && userId) {
       const targetUser = messageId;
 
-      socket.emit('send-message', { message: newMessage, targetUser: targetUser});
+      socket.emit('send-message', { message: newMessage, targetUser: targetUser, userPhoto: user.photo});
 
       setNewMessage(null)
     }
@@ -131,10 +148,10 @@ const Chat = () => {
 
     const date = new Date(milliseconds);
 
-    const minute = date.getMinutes();
-    const hour = date.getHours();
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
+    const minute = date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
+    const hour = date.getHours() < 10 ? `0${date.getHours()}` : date.getHours();
+    const day = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate();
+    const month = date.getMonth() < 9 ? `0${date.getMonth()+1}` : date.getMonth();
     const year = date.getFullYear();
 
     const formattedDate = `${day}/${month}/${year} ${hour}:${minute}`;
@@ -152,7 +169,6 @@ const Chat = () => {
           <div id='chat-list'>
             <ul id='chat-players'>
               {chatMessages && messageId && Object.keys(chatMessages).map((key, index, messageIds) => (
-                console.log(chatMessages[key].photo),
                 <li className="chat-players-item" key={key}>
                   <img
                     src={chatMessages[key].photo ? `${uploads}/users/${chatMessages[key].photo}` : `${uploads}/users/user.png`}
@@ -165,17 +181,24 @@ const Chat = () => {
             </ul>
             <div id="current-chat">
               <div id='current-chat-label'>
-                {chatMessages && chatMessages[messageId] && chatMessages[messageId].photo ? <img src={`${uploads}/users/${chatMessages[messageId].photo}`}/> : <img src={`${uploads}/users/user.png`} alt={'user-1-photo'} id="current-chat-label-image" />}
+                {
+                  chatMessages && chatMessages[messageId] 
+                    ? true && chatMessages[messageId].photo
+                      ? <img src={`${uploads}/users/${chatMessages[messageId].photo}`} id="current-chat-label-image"/>
+                      : <img src={`${uploads}/users/user.png`} id="current-chat-label-image"/>
+                    : null
+                }
               </div>
               <ul id="chat-messages" ref={chatMessagesRef}>
-                {console.log("FOTO DO USUÁRIO: ", chatMessages[messageId])}
                 {chatMessages && chatMessages[messageId] && Object.keys(chatMessages[messageId]).map((key, index, messageIds) => {
                   if (key != 'photo') {
                     const currentMessage = chatMessages[messageId][key];
                     const isCurrentUserMessage = currentMessage.sender === userId;
                     const nextMessageKey = messageIds[index + 1];
                     const nextMessage = nextMessageKey ? chatMessages[messageId][nextMessageKey] : null;
-                    const shouldAddBorderClass = !isCurrentUserMessage && nextMessage && nextMessage.sender !== userId;
+                    const shouldAddBorderCase1 = isCurrentUserMessage && nextMessage.sender !== user;
+                    const shouldAddBorderCase2 = !isCurrentUserMessage && nextMessage.sender === user;
+                    const shouldAddBorderClass = nextMessage && nextMessage.sender !== userId;
   
                     return(
                       <li

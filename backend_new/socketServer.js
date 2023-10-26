@@ -1,7 +1,7 @@
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
-const { sendMessage, getMessages, startChat } = require('./firebase');
+const { sendMessage, getMessages } = require('./firebase');
 const cors = require('cors');
 
 const app = express();
@@ -33,6 +33,11 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   console.log('Novo usuário conectado');
 
+  //Caso um usuário se conecte e não possua login
+  if(!users[socket.id]) {
+    socket.emit('login-necessary');
+  }
+
   //Join an user to the chat server
   socket.on('join', (username) => {
     users[socket.id] = username;
@@ -41,25 +46,63 @@ io.on('connection', (socket) => {
   });
 
   //Send the first message to another user
-  socket.on('start-chat', ({message, targetUser, userPhoto, targetPhoto}) => {
-    const userName = users[socket.id];
-    console.log("FOTOS: ", userPhoto, targetPhoto)
-    console.log("Usuário: ", userName);
-    console.log("Usuário alvo: ", targetUser);
-    io.emit('message', `${userName}: ${message}`);
-    
+  socket.on('start-chat', ({targetUser, userPhoto, targetPhoto}) => {
+    const user = users[socket.id];
+    if(!user) {
+      socket.emit('login-necessary');
+      return;
+    }
 
-    startChat(userName, targetUser, message, userPhoto, targetPhoto);
+    if(user && targetUser && userPhoto && targetPhoto) {
+      console.log("Criou o chat entre os jogadores.");
+      console.log("user: ", user);
+      console.log("targetUser: ", targetUser);
+      console.log("userPhoto: ", userPhoto);
+      console.log("targetPhoto: ", targetPhoto);
+      sendMessage({message: null, sender: user, receiver: targetUser, senderPhoto: userPhoto, receiverPhoto: targetPhoto});
+    }
+
+    //Refreshes the messages of the sender socket user
+    socket.emit('refresh');
+    console.log("Mensagens atualizadas do usuário atual: ", socket.id);
+
+    //Refreshes the messages of the receiver socket user (if he is online)
+    const targetSocketId = Object.keys(users).find((key) => users[key] === targetUser);
+    if (targetSocketId) {
+      console.log("Mensagens atualizadas do usuário recebedor: ", targetSocketId);
+      io.to(targetSocketId).emit('refresh');
+    }
   });
 
   //Send a message to another user
-  socket.on('send-message', ({message, targetUser}) => {
-    const userName = users[socket.id];
-    console.log("Usuário: ", userName);
-    console.log("Usuário alvo: ", targetUser);
-    io.emit('message', `${userName}: ${message}`);
+  socket.on('send-message', ({message, targetUser, userPhoto}) => {
+    const user = users[socket.id];
+    if(!user) {
+      socket.emit('login-necessary');
+      return;
+    }
 
-    sendMessage(userName, targetUser, message);
+    console.log("Lista de elementos da mensagem:")
+    console.log(message)
+    console.log(user)
+    console.log(targetUser)
+    console.log(userPhoto)
+
+    if(message && user && targetUser && userPhoto) {
+      console.log("Enviou uma mensagem.");
+      sendMessage({message: message, sender: user, receiver: targetUser, senderPhoto: userPhoto});
+    }
+
+    //Refreshes the messages of the sender socket user
+    socket.emit('refresh');
+    console.log("Mensagens atualizadas do usuário atual: ", socket.id);
+
+    //Refreshes the messages of the receiver socket user (if he is online)
+    const targetSocketId = Object.keys(users).find((key) => users[key] === targetUser);
+    if (targetSocketId) {
+      console.log("Mensagens atualizadas do usuário recebedor: ", targetSocketId);
+      io.to(targetSocketId).emit('refresh');
+    }
   });
 
   //Get all user messages
@@ -68,9 +111,6 @@ io.on('connection', (socket) => {
     if (username) {
       try {
         const messages = await getMessages(username);
-
-        console.log(messages)
-        
         socket.emit('messages', messages);
       } catch (error) {
         console.error('Erro ao obter mensagens: ', error);

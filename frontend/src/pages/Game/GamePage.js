@@ -64,14 +64,10 @@ const GamePage = () => {
           }
         }
       
-        // Crie um novo objeto com as propriedades copiadas de games[game]
         const formattedGameInfo = { ...games[game] };
         formattedGameInfo.userInfo = formattedUserInfo;
       
         setGameInfo(formattedGameInfo);
-      
-        console.log("games[game]: ", games[game]);
-        console.log("gameInfo: ", gameInfo);
       }
       if(games.labels) {
         const labelsArray = Object.keys(games.labels);
@@ -95,15 +91,12 @@ const GamePage = () => {
 
         setGameLabels(sortedLabels)
       }
-      //console.log("gameInfo: ", gameInfo);
-      //console.log("gameLabels: ", gameLabels)
     }
   }, [games]);
 
   useEffect(() => {
     if(players) {
       setGamePlayers(players);
-      //console.log(gamePlayers)
     }
   }, [players]);
 
@@ -214,5 +207,3 @@ const GamePage = () => {
 };
 
 export default GamePage;
-
-
