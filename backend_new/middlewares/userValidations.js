@@ -53,7 +53,13 @@ const userUpdateValidation = () => {
       .isLength({min: 5}).withMessage("A senha deve ter ao menos 5 caracteres.")
       .custom((value) => {
         console.log(value)
-      })
+      }),
+    body("birth_date")
+      .optional()
+      .isLength({min: 10}).withMessage("Informe uma data de nascimento válida")
+      .custom((value) => {
+        console.log(value)
+      }),
   ]
 }
 

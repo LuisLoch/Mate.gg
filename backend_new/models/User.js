@@ -1,6 +1,3 @@
-const { getDatabase, ref, push, update, onValue, get, remove } = require("firebase/database");
-const dbconfig = require("../config/db");
-
 class User {
   constructor(email, password, birth_date, games, photo) {
     this.email = email;

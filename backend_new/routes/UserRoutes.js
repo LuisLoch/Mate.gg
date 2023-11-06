@@ -17,6 +17,18 @@ router.put("/games/", authGuard, userUpdateGameValidation(), validate, updateCur
 router.post("/register", userCreateValidation(), validate, register);
 router.post("/login", loginValidation(), validate, login);
 router.get("/profile", authGuard, getCurrentUser);
-router.put("/", authGuard, userUpdateValidation(), validate, imageUpload.single("photo"), updateUser);
+// router.put("/", authGuard, 
+// // (req, res, next) => {
+// //   const formData = req.body;
+// //   console.log("body: ", req.body)
+// //   console.log("FormData: ", formData)
+// //   for (const key in formData) {
+// //     req.body[key] = formData[key];
+// //   }
+// //   console.log("body: ", req.body)
+// //   next();
+// // }, 
+// userUpdateValidation(), validate, imageUpload.single("photo"), updateUser);
+router.put('/', authGuard, userUpdateValidation(), validate, imageUpload.single('photo'), updateUser);
 router.get("/:id", getUserById);
 module.exports = router;

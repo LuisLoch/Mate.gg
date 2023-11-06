@@ -20,7 +20,7 @@ const generateToken = (id) => {
 }
 
 //register user and sign in
-const register = async(req, res) => {
+const register = async (req, res) => {
   const {email, password} = req.body;
 
   try{
@@ -88,7 +88,7 @@ const login = async (req, res) => {
 }
 
 //get current logged in user
-const getCurrentUser = async(req, res) => {
+const getCurrentUser = async (req, res) => {
   const user = req.user;
   
   res.status(200).json(user);

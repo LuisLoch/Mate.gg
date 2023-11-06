@@ -2,7 +2,7 @@
 const Game = require("../models/Game");
 
 //db
-const { ref, get, query, equalTo, orderByChild } = require("firebase/database");
+const { ref, get, query} = require("firebase/database");
 const db = require("../config/db")
 
 const gamesRef = ref(db, "games");
@@ -14,8 +14,6 @@ const getGameList = async(req, res) => {
 
     gamesSnapshot.forEach((game) => {
       const gameData = game.val();
-      //const { name, splashart } = gameData;
-      // gameList.push({name, splashart});
       gameList[game.key] = gameData;
     })
 

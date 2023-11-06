@@ -107,11 +107,13 @@ const GamePage = () => {
   }
 
   //Starts a chat with the clicked player
-  const handlePlayerClick = (player) => {  
-    console.log(user);
-    if(user && user.id !== player.id) {
-      console.log("Clicou no player", player.id, player.photo);
-      dispatch(newUserChat(player))
+  const handlePlayerClick = (player) => {
+    var newChatInfo = {...player}
+    if(user && user.id !== newChatInfo.id) {
+      if(!newChatInfo.photo) {
+        newChatInfo.photo = 'user.png'
+      }
+      dispatch(newUserChat(newChatInfo))
       console.log("Setou o newUserChat")
     }
   }
