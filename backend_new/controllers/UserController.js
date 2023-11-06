@@ -224,7 +224,7 @@ const getPlayerList = async(req, res) => {
     usersSnapshot.forEach((user) => {
       const playerData = user.val();
       const playerKey = user.key;
-      if (playerData && playerData.games[gameId]) {
+      if (playerData && playerData.games && playerData.games[gameId]) {
         const player = playerData.games[gameId];
         player.region = playerData.region;
         player.birth_date = playerData.birth_date;
@@ -247,8 +247,6 @@ const getPlayerList = async(req, res) => {
     playerArray.forEach((player) => {
       sortedPlayerList[player.nickname] = player;
     });
-
-    //console.log("PLAYER LIST FINAL: ", sortedPlayerList)
 
     res.status(200).json(sortedPlayerList);
   } catch (error) {

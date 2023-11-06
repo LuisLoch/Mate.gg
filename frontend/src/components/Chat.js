@@ -26,7 +26,7 @@ const Chat = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(false);
   const [chatMessages, setChatMessages] = useState({});
-  const [messageId, setMessageId] = useState(null);
+  const [messageId, setMessageId] = useState('');
   const [newMessage, setNewMessage] = useState(null);
   const [userId, setUserId] = useState(null);
   
@@ -66,9 +66,6 @@ const Chat = () => {
         console.log("chatMessages: ", messages)
         setChatMessages(messages); //Sets the chatMessages with the messages received from the server
         setUnreadMessages(messages.notification)
-        if(!messageId) { //If the chat has no messageId to list the messages from a single user
-          setMessageId(Object.keys(messages)[0]); //Sets the messageId from the first element of the messages
-        }
       });
 
       //If the server emits a refresh message
@@ -97,6 +94,10 @@ const Chat = () => {
     if(user.email && socket) {
       setIsOpen(!isOpen);
       socket.emit('notify', {user: user.id, value: false})
+      
+      if(messageId == '' && chatMessages) { //If the chat has no messageId to list the messages from a single user and the chatMessages isn't empty
+        setMessageId(Object.keys(chatMessages)[0]); //Sets the messageId from the first element of the messages
+      }
     }
   };
 
@@ -137,11 +138,13 @@ const Chat = () => {
   //Handles a message submit from the message input
   const handleMessageSubmit = (e) => {
     if(socket && userId) {
-      const targetUser = messageId;
-
-      socket.emit('send-message', { message: newMessage, targetUser: targetUser, userPhoto: user.photo});
-
-      setNewMessage(null)
+      if(messageId && chatMessages[messageId]){
+        console.log("messageId: ", messageId);
+        socket.emit('send-message', { message: newMessage, targetUser: messageId, userPhoto: user.photo});
+  
+        setNewMessage(null)
+        console.log("messageId: ", messageId);
+      }
     }
   };
 

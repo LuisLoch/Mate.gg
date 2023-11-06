@@ -1,4 +1,4 @@
-const {body} = require("express-validator");
+const {body, } = require("express-validator");
 
 function timeDifference(times) {
   const [start, end] = times.split(" - ");
@@ -48,13 +48,12 @@ const loginValidation = () => {
 
 const userUpdateValidation = () => {
   return [
-    (req, res, next) => {
-      console.log("Dados do corpo na função userCreateValidation:", req.body);
-      next();
-    },
     body("password")
       .optional()
-      .isLength({min: 5}).withMessage("A senha deve ter ao menos 5 caracteres."),
+      .isLength({min: 5}).withMessage("A senha deve ter ao menos 5 caracteres.")
+      .custom((value) => {
+        console.log(value)
+      })
   ]
 }
 

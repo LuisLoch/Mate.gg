@@ -162,7 +162,7 @@ const GamePage = () => {
                       return (
                         <li className='player-info' key={playerKey} onClick={() => handlePlayerClick(playerData)}>
                           {orderedKeys.map((key) => {
-                            const value = playerData[key] ? playerData[key] : playerData[key] === 0 ? "0" : "N/A";
+                            const value = playerData[key] || "N/A";
                             return (
                               <span className={`player-info-item ${key === 'description' ? 'double-space' : ''}`} key={key}>
                                 {key === 'nickname' ? (
