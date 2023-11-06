@@ -39,7 +39,6 @@ const updateProfile = async (data, token) => {
 //Update or define a user game
 const updateUserGame = async (data, token) => {
   const config = requestConfig("PUT", data, token, false);
-  console.log("userService data: ", data.validations);
 
   try {
     const res = await fetch(api + "/users/games/", config)

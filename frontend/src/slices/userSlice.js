@@ -38,7 +38,6 @@ export const updateProfile = createAsyncThunk(
 
     const data = await userService.updateProfile(user, token);
 
-
     if (data.errors) {
       return thunkAPI.rejectWithValue(data.errors[0]);
     }
@@ -50,12 +49,10 @@ export const updateProfile = createAsyncThunk(
 //Update or define a user game
 export const updateUserGame = createAsyncThunk(
   "user/updateGame",
-  async (game, thunkAPI) => {
+  async (games, thunkAPI) => {
     const token = thunkAPI.getState().auth.user.token;
 
-    console.log("userSlice data: ", game);
-
-    const data = await userService.updateUserGame(game, token);
+    const data = await userService.updateUserGame(games, token);
 
     if (data.errors) {
       return thunkAPI.rejectWithValue(data.errors[0]);

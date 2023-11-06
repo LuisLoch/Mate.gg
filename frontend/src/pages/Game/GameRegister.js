@@ -53,19 +53,42 @@ const GameRegister = () => {
       if(games[game] && games[game].name){
         setGameName(games[game].name);
         setLabels(games["labels"])
-        console.log("LABELS: ", labels)
       }
     }
   }, [games, game]);
 
   //Fill userGames with the game from his list of games
   useEffect(() => {
-    if(userGames && game) {
-      if(userGames[game]) {
-        setFormDataObject(userGames[game]);
+    if (userGames && game) {
+      if (userGames[game]) {
+        if (userGames[game].dailyOnlineTime) {
+          var newFormData = {
+            ...userGames[game]
+          };
+
+          console.log("newFormData: ", newFormData)
+  
+          try {
+            const timeParts = userGames[game].dailyOnlineTime.split(" - ");
+  
+            if (timeParts.length === 2) {
+              const [startHour, startMinute] = timeParts[0].split(":").map(Number);
+              const [endHour, endMinute] = timeParts[1].split(":").map(Number);
+  
+              newFormData = {
+                ...newFormData,
+                startHour,
+                startMinute,
+                endHour,
+                endMinute
+              }
+            }
+          } catch (error) {}
+          setFormDataObject(newFormData);
+          console.log("newFormData: ", newFormData)
+        }
       }
     }
-    console.log("formDataObject: ", formDataObject)
   }, [userGames, game]);
 
   //Fill user game info to edit (if exists), and fill the gameInfo needed to create the form and register
@@ -87,6 +110,7 @@ const GameRegister = () => {
           }
         
           setGameFields(formattedUserInfo);
+          console.log("formattedUserInfo: ", formattedUserInfo)
         }
       }
     }
@@ -94,24 +118,39 @@ const GameRegister = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormDataObject({ ...formDataObject, [name]: value });
+
+    try {
+      var newValue;
+      if(name === 'level') {
+        newValue = parseInt(value);
+      } else {
+        newValue = value;
+      }
+  
+      setFormDataObject({ ...formDataObject, [name]: newValue });
+
+    } catch {}
+
   };
 
   const handleNumberChange = (e) => {
     const { name, value } = e.target;
-  
-    if (!isNaN(value) && parseFloat(value) >= 0) {
-      setFormDataObject({ ...formDataObject, [name]: value });
-    }
+
+    try{
+      const newValue = parseInt(value);
+      if (!isNaN(newValue) && (parseInt(value) >= 0)) {
+        setFormDataObject({ ...formDataObject, [name]: newValue });
+      }
+    } catch {}  
   };
 
   const handleTimeChange = (e) => {
     const { name, value } = e.target;
-  
-    if (!isNaN(value) && parseFloat(value) >= 0) {
-      setFormDataObject({ ...formDataObject, [name]: value });
+
+    
+    if (!isNaN(value) && parseInt(value) >= 0) {
+      setFormDataObject({ ...formDataObject, [name]: parseInt(value) });
     }
-    console.log(formDataObject);
   };
 
   const handleLolMainsChange = (e, index) => {
@@ -120,44 +159,41 @@ const GameRegister = () => {
     var currentMains = formDataObject['mains'];
 
     if (!currentMains) {
-      setFormDataObject({ ...formDataObject, [name]: value})
-      console.log("mains: ", formDataObject['mains'])
+      setFormDataObject({ ...formDataObject, [name]: value});
       return;
     }
 
     const mainsArray = currentMains.split(', ');
-
-    if(mainsArray.length === 1) {
-      console.log("FormDataObject tem 1 mains")
-      if(index === 0) {
-        setFormDataObject({ ...formDataObject, [name]: value})
-      } else {
-        const newMains = `${mainsArray[0]}, ${value}`;
-        setFormDataObject({ ...formDataObject, [name]: newMains})
-      }
-    } else if (mainsArray.length === 2) {
-      console.log("FormDataObject tem 1 mains")
-      if(index === 0) {
-        const newMains = `${value}, ${mainsArray[1]}`
-        setFormDataObject({ ...formDataObject, [name]: newMains})
-      } else if(index === 1) {
-        const newMains = `${mainsArray[0]}, ${value}`
-        setFormDataObject({ ...formDataObject, [name]: newMains})
-      } else if(index === 2) {
-        const newMains = `${mainsArray[0]}, ${mainsArray[1]}, ${value}`
-        setFormDataObject({ ...formDataObject, [name]: newMains})
-      }
-    } else if (mainsArray.length === 3) {
-      console.log("FormDataObject tem 1 mains")
-      if(index === 0) {
-        const newMains = `${value}, ${mainsArray[1]}, ${mainsArray[2]}`
-        setFormDataObject({ ...formDataObject, [name]: newMains})
-      } else if(index === 1) {
-        const newMains = `${mainsArray[0]}, ${value}, ${mainsArray[2]}`
-        setFormDataObject({ ...formDataObject, [name]: newMains})
-      } else if(index === 2) {
-        const newMains = `${mainsArray[0]}, ${mainsArray[1]}, ${value}`
-        setFormDataObject({ ...formDataObject, [name]: newMains})
+    if(!mainsArray.includes(value)) {
+      if(mainsArray.length === 1) {
+        if(index === 0) {
+          setFormDataObject({ ...formDataObject, [name]: value})
+        } else {
+          const newMains = `${mainsArray[0]}, ${value}`;
+          setFormDataObject({ ...formDataObject, [name]: newMains})
+        }
+      } else if (mainsArray.length === 2) {
+        if(index === 0) {
+          const newMains = `${value}, ${mainsArray[1]}`
+          setFormDataObject({ ...formDataObject, [name]: newMains})
+        } else if(index === 1) {
+          const newMains = `${mainsArray[0]}, ${value}`
+          setFormDataObject({ ...formDataObject, [name]: newMains})
+        } else if(index === 2) {
+          const newMains = `${mainsArray[0]}, ${mainsArray[1]}, ${value}`
+          setFormDataObject({ ...formDataObject, [name]: newMains})
+        }
+      } else if (mainsArray.length === 3) {
+        if(index === 0) {
+          const newMains = `${value}, ${mainsArray[1]}, ${mainsArray[2]}`
+          setFormDataObject({ ...formDataObject, [name]: newMains})
+        } else if(index === 1) {
+          const newMains = `${mainsArray[0]}, ${value}, ${mainsArray[2]}`
+          setFormDataObject({ ...formDataObject, [name]: newMains})
+        } else if(index === 2) {
+          const newMains = `${mainsArray[0]}, ${mainsArray[1]}, ${value}`
+          setFormDataObject({ ...formDataObject, [name]: newMains})
+        }
       }
     }
   }
@@ -165,30 +201,37 @@ const GameRegister = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const data = formDataObject;
-    data.userId = user.id;
+    var data = {...formDataObject};
+    const userId = user.id;
+    data.userId = userId;
     data.game = game;
-    data.validations = Object.keys(games[game].userInfo);
-    console.log("validations: ", data.validations);
-    if(formDataObject["startHour"] && formDataObject["startMinute"] && formDataObject["endHour"] && formDataObject["endMinute"]) {
-      formDataObject["startHour"] = formDataObject["startHour"] < 10 ? `0${formDataObject["startHour"]}` : `${formDataObject["startHour"]}`;
-      formDataObject["startMinute"] = formDataObject["startMinute"] < 10 ? `0${formDataObject["startMinute"]}` : `${formDataObject["startMinute"]}`;
-      formDataObject["endHour"] = formDataObject["endHour"] < 10 ? `0${formDataObject["endHour"]}` : `${formDataObject["endHour"]}`;
-      formDataObject["endMinute"] = formDataObject["endMinute"] < 10 ? `0${formDataObject["endMinute"]}` : `${formDataObject["endMinute"]}`;
-      data.dailyOnlineTime = `${formDataObject["startHour"]}:${formDataObject["startMinute"]} - ${formDataObject["endHour"]}:${formDataObject["endMinute"]}`;
+    data.validations = Object.keys(gameFields).map((key) => key.toString());
+    if(formDataObject["startHour"] >= 0 && formDataObject["startMinute"] >= 0 && formDataObject["endHour"] >= 0 && formDataObject["endMinute"] >= 0) {
+      const newStartHour = formDataObject["startHour"] < 10 ? `0${formDataObject["startHour"]}` : `${formDataObject["startHour"]}`;
+      const newStartMinute = formDataObject["startMinute"] < 10 ? `0${formDataObject["startMinute"]}` : `${formDataObject["startMinute"]}`;
+      const newEndHour = formDataObject["endHour"] < 10 ? `0${formDataObject["endHour"]}` : `${formDataObject["endHour"]}`;
+      const newEndMinute = formDataObject["endMinute"] < 10 ? `0${formDataObject["endMinute"]}` : `${formDataObject["endMinute"]}`;
+      const dailyOnlineTime = `${newStartHour}:${newStartMinute} - ${newEndHour}:${newEndMinute}`;
+      data = {
+        ...data,
+        dailyOnlineTime
+      }
     }
 
-    delete formDataObject["startHour"];
-    delete formDataObject["startMinute"];
-    delete formDataObject["endHour"];
-    delete formDataObject["endMinute"];
-    console.log("DATA: ", data);
-    await dispatch(updateUserGame(data));
-    delete data.dailyOnlineTime;
-  
+    delete data.startHour;
+    delete data.startMinute;
+    delete data.endHour;
+    delete data.endMinute;
+    console.log("Dados enviados: ", data);
+
+    const updateReturn = await dispatch(updateUserGame(data));
+
     setTimeout(() => {
       dispatch(resetMessage());
-      return navigate(`/gamePage/${game}`);
+      console.log("Update return: ", updateReturn)
+      if(!updateReturn.error) {
+        return navigate(`/gamePage/${game}`);
+      }
     }, 2000);
   };
 
@@ -220,13 +263,13 @@ const GameRegister = () => {
                         <select
                           id={`startHour`}
                           name={`startHour`}
-                          value={formDataObject[`startHour`] || ''}
+                          value={formDataObject['startHour'] !== null ? formDataObject['startHour'] : ''}
                           onChange={handleTimeChange}
                         >
                           <option value={null}>Selecione</option>
-                          {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
-                            <option key={hour} value={hour}>
-                              {hour < 10 ? `0${hour}h` : `${hour}h`}
+                          {Array.from({ length: 24 }, (_, i) => i).map((startHour) => (
+                            <option key={startHour} value={startHour}>
+                              {startHour < 10 ? `0${startHour}h` : `${startHour}h`}
                             </option>
                           ))}
                         </select>
@@ -234,13 +277,13 @@ const GameRegister = () => {
                         <select
                           id={`startMinute`}
                           name={`startMinute`}
-                          value={formDataObject[`startMinute`] || ''}
+                          value={formDataObject['startMinute'] !== null ? formDataObject['startMinute'] : ''}
                           onChange={handleTimeChange}
                         >
                           <option value={null}>Selecione</option>
-                          {Array.from({ length: 60 }, (_, i) => i).map((minute) => (
-                            <option key={minute} value={minute}>
-                              {minute < 10 ? `0${minute}m` : `${minute}m`}
+                          {Array.from({ length: 60 }, (_, i) => i).map((startMinute) => (
+                            <option key={startMinute} value={startMinute}>
+                              {startMinute < 10 ? `0${startMinute}m` : `${startMinute}m`}
                             </option>
                           ))}
                         </select>
@@ -252,13 +295,13 @@ const GameRegister = () => {
                         <select
                           id={`endHour`}
                           name={`endHour`}
-                          value={formDataObject[`endHour`] || ''}
+                          value={formDataObject['endHour'] !== null ? formDataObject['endHour'] : ''}
                           onChange={handleTimeChange}
                         >
                           <option value={null}>Selecione</option>
-                          {Array.from({ length: 24 }, (_, i) => i).map((hour) => (
-                            <option key={hour} value={hour}>
-                              {hour < 10 ? `0${hour}h` : `${hour}h`}
+                          {Array.from({ length: 24 }, (_, i) => i).map((endHour) => (
+                            <option key={endHour} value={endHour}>
+                              {endHour < 10 ? `0${endHour}h` : `${endHour}h`}
                             </option>
                           ))}
                         </select>
@@ -266,13 +309,13 @@ const GameRegister = () => {
                         <select
                           id={`endMinute`}
                           name={`endMinute`}
-                          value={formDataObject[`endMinute`] || ''}
+                          value={formDataObject['endMinute'] !== null ? formDataObject['endMinute'] : ''}
                           onChange={handleTimeChange}
                         >
                           <option value={null}>Selecione</option>
-                          {Array.from({ length: 60 }, (_, i) => i).map((minute) => (
-                            <option key={minute} value={minute}>
-                              {minute < 10 ? `0${minute}m` : `${minute}m`}
+                          {Array.from({ length: 60 }, (_, i) => i).map((endMinute) => (
+                            <option key={endMinute} value={endMinute}>
+                              {endMinute < 10 ? `0${endMinute}m` : `${endMinute}m`}
                             </option>
                           ))}
                         </select>
@@ -283,14 +326,14 @@ const GameRegister = () => {
                   <div id='lol-mains'>
                     {Array(3).fill().map((_, index) => (
                       <select
+                        key={`${fieldName}-${index}`}
                         id={fieldName}
                         className='lol-main-selector'
-                        key={`${fieldName}-${index}`}
                         name={fieldName}
                         value={(formDataObject[fieldName] && formDataObject[fieldName].split(', ')[index]) || ''}
                         onChange={(e) => handleLolMainsChange(e, index)}
                       >
-                        <option value={null}>
+                        <option value="">
                           Selecione
                         </option>
                         {Object.values(field).map((value) => (
@@ -306,7 +349,7 @@ const GameRegister = () => {
                     type="number"
                     id={fieldName}
                     name={fieldName}
-                    value={formDataObject[fieldName] || ''}
+                    value={formDataObject[fieldName] === 0 ? 0 : formDataObject[fieldName] ? formDataObject[fieldName] : ''}
                     onChange={handleNumberChange}
                   />
                 ) : field === 'String' ? (
@@ -321,10 +364,10 @@ const GameRegister = () => {
                   <select
                     id={fieldName}
                     name={fieldName}
-                    value={formDataObject[fieldName] || ''}
+                    value={formDataObject[fieldName] === 0 ? 0 : formDataObject[fieldName] ? formDataObject[fieldName] : ''}
                     onChange={handleChange}
                   >
-                    <option value={null}>
+                    <option value="">
                       Selecione
                     </option>
                     {Object.values(field).map((value) => (

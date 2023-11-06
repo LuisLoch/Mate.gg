@@ -1,43 +1,21 @@
 const {body} = require("express-validator");
 
-// const isValidDate = (dateString) => {
-//   console.log("ENTROU NO TESTE DE DATA: ", dateString)
-//   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+function timeDifference(times) {
+  const [start, end] = times.split(" - ");
 
-//   if (!dateRegex.test(dateString)) {
-//     return false;
-//   }
+  const [startHour, startMinute] = start.split(":").map(Number);
+  const [endHour, endMinute] = end.split(":").map(Number);
 
-//   console.log("PASSOU TESTE DE TAMANHO")
+  let differenceInMinutes = endHour * 60 + endMinute - (startHour * 60 + startMinute);
 
-//   const parts = dateString.split('-');
-//   const year = parseInt(parts[0], 10);
-//   const month = parseInt(parts[1], 10);
-//   const day = parseInt(parts[2], 10);
+  if (differenceInMinutes < 0) {
+    differenceInMinutes += 24 * 60;
+  }
 
-//   if (isNaN(year) || isNaN(month) || isNaN(day)) {
-//     return false;
-//   }
-//   console.log("PASSOU TESTE DE ANO")
+  const hoursOfDifference = Math.floor(differenceInMinutes / 60);
 
-//   if (month < 1 || month > 12) {
-//     return false;
-//   }
-//   console.log("PASSOU TESTE DE MES")
-
-//   const daysInMonth = new Date(year, month, 0).getDate();
-//   if (day < 1 || day > daysInMonth) {
-//     return false;
-//   }
-//   console.log("PASSOU TESTE DE DIA")
-
-//   const today = new Date();
-//   const minAllowedDate = new Date(today.getFullYear() - 10, today.getMonth(), today.getDate());
-
-//   const inputDate = new Date(year, month - 1, day);
-//   console.log("PASSOU TESTE DE DATA MAXIMA")
-//   return inputDate <= minAllowedDate;
-// };
+  return parseInt(hoursOfDifference);
+}
 
 const userCreateValidation = () => {
   return [
@@ -70,6 +48,10 @@ const loginValidation = () => {
 
 const userUpdateValidation = () => {
   return [
+    (req, res, next) => {
+      console.log("Dados do corpo na função userCreateValidation:", req.body);
+      next();
+    },
     body("password")
       .optional()
       .isLength({min: 5}).withMessage("A senha deve ter ao menos 5 caracteres."),
@@ -79,24 +61,96 @@ const userUpdateValidation = () => {
 const userUpdateGameValidation = () => {
   return [
     body("dailyOnlineTime")
-      .isString().withMessage("Insira uma janela de tempo válida.")
-      .isLength({min: 13}).withMessage("Insira uma janela de tempo válida."),
-    body("description")
-      .isString().withMessage("Adicione uma descrição.")
-      .isLength({min: 10}).withMessage("Adicione uma descrição um pouco maior."),
-    body("nickname")
-      .isString().withMessage("Insira um nickname válido.")
-      .isLength({min: 3}),
-    body("playtime")
-      .isNumeric().withMessage("O tempo de jogo é obrigatório."),
-    body("level")
-      .isNumeric().withMessage("O nível de jogador é obrigatório."),
-    body("elo")
-      .optional(),
+      .custom((value, {req}) => {
+        if(req.body.validations.includes('dailyOnlineTime')) {
+          if (typeof value !== 'string' || !value) {
+            throw new Error("Insira uma janela de tempo diária válida.");
+          }
+          if (value.length < 13) {
+            throw new Error("Insira uma janela de tempo diária completa, com horas e minutos.");
+          }
+          const hoursOfDifference = timeDifference(value);
+          if (hoursOfDifference > 16) {
+            throw new Error(`Vamos lá, seja realista. Você não joga ${hoursOfDifference} horas por dia!`);
+          }
+        }
+        return true;
+      }),
     body("mains")
-      .custom((value) => {
-        if (!Array.isArray(value) || value.length !== 3) {
-          throw new Error("Você deve informar pelo menos 3 campeões principais.");
+      .custom((value, {req}) => {
+        if(req.body.validations.includes('mains')) {
+          if (typeof value !== 'string' || !value) {
+            throw new Error("Informe os três campeões que você mais joga.");
+          }
+          const regex = /,/g;
+          const occurrences = value.match(regex);
+          //console.log("Quantas vírgulas foram encontradas: ", occurrences.length)
+          if(!occurrences || occurrences.length === 0) {
+            throw new Error("Informe mais dois campeões que você joga.");
+          } else {
+            if(occurrences.length === 1) {
+              throw new Error("Informe mais um campeão que você joga.");
+            }
+          }
+        }
+        return true;
+      }),
+    body("description")
+      .custom((value, {req}) => {
+        if(req.body.validations.includes('description')) {
+          if (typeof value !== 'string') {
+            throw new Error("Adicione uma descrição para podermos te conhecer melhor.");
+          }
+          if (value.length < 20) {
+            throw new Error("Informe uma descrição maior.");
+          }
+        }
+        return true;
+      }),
+    body("nickname")
+      .custom((value, {req}) => {
+        if(req.body.validations.includes('nickname')) {
+          if (typeof value !== 'string') {
+            throw new Error("Informe um nick de jogador válido.");
+          }
+          if (value.length < 1) {
+            throw new Error("Informe um nick de jogador maior.");
+          }
+        }
+        return true;
+      }),
+    body("playtime")
+      .custom((value, {req}) => {
+        if(req.body.validations.includes('playtime')) {
+          console.log("isInteger: ", !Number.isInteger(value))
+          console.log("value: ", value, typeof value)
+          if (!Number.isInteger(value) && value !== 0) {
+            throw new Error("Informe um tempo de jogo válido.");
+          }
+          if (value < 0) {
+            throw new Error("Informe um tempo de jogo maior.");
+          }
+        }
+        return true;
+      }),
+    body("level")
+      .custom((value, {req}) => {
+        if(req.body.validations.includes('level')) {
+          if (!Number.isInteger(value)) {
+            throw new Error("Informe um nível de jogador válido.");
+          }
+          if (value < 0) {
+            throw new Error("Informe um nível de jogador maior.");
+          }
+        }
+        return true;
+      }),
+    body("elo")
+      .custom((value, {req}) => {
+        if(req.body.validations.includes('elo')) {
+          if (!value) {
+            throw new Error("Informe um elo.");
+          }
         }
         return true;
       }),
