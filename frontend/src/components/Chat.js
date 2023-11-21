@@ -63,10 +63,15 @@ const Chat = () => {
  
       //If the server emits a message
       socket.on('messages', (messages) => {
-        console.log("chatMessages: ", messages)
         setChatMessages(messages); //Sets the chatMessages with the messages received from the server
         setUnreadMessages(messages.notification)
       });
+      // socket.on('messages', (messages) => {
+      //   setChatMessages((prevChatMessages) => {
+      //     return { ...prevChatMessages, ...messages };
+      //   });
+      //   setUnreadMessages(messages.notification);
+      // });
 
       //If the server emits a refresh message
       socket.on('refresh', () => {
@@ -75,7 +80,6 @@ const Chat = () => {
 
       //If the server requires login for some reason
       socket.on('login-necessary', () => {
-        console.log("SERVIDOR REQUISITOU LOGIN")
         socket.emit('join', userId); //Log the current user in the server
       })
     } 
@@ -93,7 +97,8 @@ const Chat = () => {
   const toggleChat = () => {
     if(user.email && socket) {
       setIsOpen(!isOpen);
-      socket.emit('notify', {user: user.id, value: false})
+      socket.emit('notify', {user: user.id, value: false});
+      setUnreadMessages(false);
       
       if(messageId == '' && chatMessages) { //If the chat has no messageId to list the messages from a single user and the chatMessages isn't empty
         setMessageId(Object.keys(chatMessages)[0]); //Sets the messageId from the first element of the messages
@@ -117,9 +122,14 @@ const Chat = () => {
           canStartChat = false;
         }
       })
+
       if(canStartChat == true) {
-        console.log("INICIOU UM NOVO CHAT: ", newUserChat)
-        socket.emit('start-chat', { targetUser: newUserChat.id, userPhoto: user.photo, targetPhoto: newUserChat.photo});
+        //console.log("INICIOU UM NOVO CHAT: ", newUserChat)
+        socket.emit('start-chat', {
+          targetUser: newUserChat.id,
+          userPhoto: user.photo || 'user.png',
+          targetPhoto: newUserChat.photo || 'user.png'
+        });
       }
     }
     dispatch(clearNewUserChat());
@@ -139,11 +149,9 @@ const Chat = () => {
   const handleMessageSubmit = (e) => {
     if(socket && userId) {
       if(messageId && chatMessages[messageId]){
-        console.log("messageId: ", messageId);
-        socket.emit('send-message', { message: newMessage, targetUser: messageId, userPhoto: user.photo});
+        socket.emit('send-message', { message: newMessage, targetUser: messageId, userPhoto: user.photo || 'user.png'});
   
         setNewMessage(null)
-        console.log("messageId: ", messageId);
       }
     }
   };
@@ -173,11 +181,11 @@ const Chat = () => {
           </button>
           <div id='chat-list'>
             <ul id='chat-players'>
-              {chatMessages && messageId && Object.keys(chatMessages).map((key, index, messageIds) => (
+              {chatMessages && Object.entries(chatMessages).map(([key, value]) => (
                 key !== 'notification' && (
                   <li className="chat-players-item" key={key}>
                     <img
-                      src={chatMessages[key].photo ? `${uploads}/users/${chatMessages[key].photo}` : `${uploads}/users/user.png`}
+                      src={`${uploads}/users/${chatMessages[key].photo || 'user.png'}`}
                       alt={`user-${key}-photo`}
                       className="chat-players-item-image"
                       onClick={() => handleChatPlayerClick(key)}
@@ -190,7 +198,7 @@ const Chat = () => {
               <div id='current-chat-label'>
                 {
                   chatMessages && chatMessages[messageId] 
-                    ? true && chatMessages[messageId].photo
+                    ? chatMessages[messageId].photo
                       ? <img src={`${uploads}/users/${chatMessages[messageId].photo}`} id="current-chat-label-image"/>
                       : <img src={`${uploads}/users/user.png`} id="current-chat-label-image"/>
                     : null

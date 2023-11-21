@@ -1,8 +1,12 @@
+require("dotenv").config();
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const { sendMessage, getMessages, setMessageNotification } = require('./firebase');
 const cors = require('cors');
+
+const port = process.env.SOCKET_SERVER_PORT;
 
 const app = express();
 
@@ -87,7 +91,6 @@ io.on('connection', (socket) => {
     }
 
     if(message && user && targetUser && userPhoto) {
-      console.log("Enviou uma mensagem.");
       sendMessage({message: message, sender: user, receiver: targetUser, senderPhoto: userPhoto});
     }
 
@@ -126,8 +129,6 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('user-disconnected', userId);
   });
 });
-
-const port = 4000;
 
 server.listen(port, () => {
   console.log(`Socket server initialized on port ${port}`);

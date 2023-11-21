@@ -11,13 +11,13 @@ const getGameList = async(req, res) => {
   try {
     const gamesSnapshot = await get(gamesRef);
     const gameList = {};
-
+    
     gamesSnapshot.forEach((game) => {
       const gameData = game.val();
       gameList[game.key] = gameData;
     })
-
-    if(!gameList) {
+    
+    if(Object.keys(gameList).length === 0) {
       res.status(404).json({errors: ["Nenhum jogo foi encontrado."]});
       return;
     }

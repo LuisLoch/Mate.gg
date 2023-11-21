@@ -5,7 +5,7 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 
-const port = process.env.PORT;
+const port = process.env.SERVER_PORT;
 
 const server = express();
 
@@ -35,3 +35,5 @@ server.use(router);
 server.listen(port, () => {
   console.log(`Server initialized on port ${port}`);
 });
+
+module.exports = server;

@@ -18,12 +18,6 @@ const profile = async (data, token) => {
 //Update user details
 const updateProfile = async (data, token) => {
   const config = requestConfig("PUT", data, token, true);
-  console.log("requestConfig: ", config);
-  console.log("userService data:");
-  console.log(typeof data);
-  for (const pair of data.entries()) {
-    console.log(pair[0], pair[1]);
-  }
 
   try {
     const res = await fetch(api + "/users/", config)

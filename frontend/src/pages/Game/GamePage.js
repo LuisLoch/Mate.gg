@@ -110,9 +110,9 @@ const GamePage = () => {
   const handlePlayerClick = (player) => {
     var newChatInfo = {...player}
     if(user && user.id !== newChatInfo.id) {
-      if(!newChatInfo.photo) {
-        newChatInfo.photo = 'user.png'
-      }
+      // if(!newChatInfo.photo) {
+      //   newChatInfo.photo = 'user.png'
+      // }
       dispatch(newUserChat(newChatInfo))
       console.log("Setou o newUserChat")
     }

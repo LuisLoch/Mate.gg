@@ -32,8 +32,7 @@ const EditProfile = () => {
 
   //Fill form with user data
   useEffect(() => {
-    console.log("Usuário: ", user)
-    if(user) {
+    if(user.email) {
       setEmail(user.email);
       setRegion(user.region);
       setBirthDate(user.birth_date)

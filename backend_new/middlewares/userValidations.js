@@ -1,4 +1,4 @@
-const {body, } = require("express-validator");
+const {body} = require("express-validator");
 
 function timeDifference(times) {
   const [start, end] = times.split(" - ");
@@ -17,13 +17,35 @@ function timeDifference(times) {
   return parseInt(hoursOfDifference);
 }
 
+function validateBirthDate(dateString) {
+  try {
+    const date = new Date(dateString);
+    if (date && date.getFullYear() > 1900) {
+      const today = new Date();
+      const age = today.getFullYear() - date.getFullYear() - (today.getMonth() < date.getMonth() || (today.getMonth() === date.getMonth() && today.getDate() < date.getDate()));
+      if(!age) {
+        return false;
+      }
+      if (age >= 10) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  } catch (error) {
+    return false;
+  }
+}
+
 const userCreateValidation = () => {
   return [
     body("email")
-      .isString().withMessage("O email é obrigatório")
+      .isString().withMessage("O email é obrigatório.")
       .isEmail().withMessage("Insira um email válido."),
     body("password")
-      .isString().withMessage("A senha é obrigatória")
+      .isString().withMessage("A senha é obrigatória.")
       .isLength({min: 5}).withMessage("A senha precisa ter no mínimo 5 caracteres."),
     body("confirmPassword")
       .isString().withMessage("A confirmação da senha é obrigatória.")
@@ -50,16 +72,19 @@ const userUpdateValidation = () => {
   return [
     body("password")
       .optional()
-      .isLength({min: 5}).withMessage("A senha deve ter ao menos 5 caracteres.")
-      .custom((value) => {
-        console.log(value)
-      }),
+      .isLength({min: 5}).withMessage("A senha deve ter ao menos 5 caracteres."),
     body("birth_date")
       .optional()
-      .isLength({min: 10}).withMessage("Informe uma data de nascimento válida")
+      .isLength({min: 10}).withMessage("Informe uma data de nascimento válida.")
       .custom((value) => {
-        console.log(value)
+        if(value && !validateBirthDate(value)) {
+          throw new Error(`Informe uma data de nascimento válida. O usuário deve ter pelo menos 10 anos de idade`);
+        }
+        return true;
       }),
+    body("region")
+      .optional()
+      .isString().withMessage("Insira uma região válida.")
   ]
 }
 
@@ -89,7 +114,6 @@ const userUpdateGameValidation = () => {
           }
           const regex = /,/g;
           const occurrences = value.match(regex);
-          //console.log("Quantas vírgulas foram encontradas: ", occurrences.length)
           if(!occurrences || occurrences.length === 0) {
             throw new Error("Informe mais dois campeões que você joga.");
           } else {
@@ -127,8 +151,6 @@ const userUpdateGameValidation = () => {
     body("playtime")
       .custom((value, {req}) => {
         if(req.body.validations.includes('playtime')) {
-          console.log("isInteger: ", !Number.isInteger(value))
-          console.log("value: ", value, typeof value)
           if (!Number.isInteger(value) && value !== 0) {
             throw new Error("Informe um tempo de jogo válido.");
           }
@@ -163,6 +185,8 @@ const userUpdateGameValidation = () => {
 }
 
 module.exports = {
+  timeDifference,
+  validateBirthDate,
   userCreateValidation,
   loginValidation,
   userUpdateValidation,

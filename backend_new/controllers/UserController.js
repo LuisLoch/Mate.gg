@@ -30,7 +30,7 @@ const register = async (req, res) => {
     );
 
     if (emailSnapshot.exists()) {
-      res.status(422).json({ errors: "O email informado já está sendo usado." });
+      res.status(422).json({ errors: ["O email informado já está sendo usado."] });
       return;
     }
 
@@ -42,16 +42,15 @@ const register = async (req, res) => {
     const newUser = new User(email, passwordHash, "", "", "");
 
     const newUserRef = push(usersRef, newUser)
-    userId = newUserRef.key;
+    const userId = newUserRef.key;
     
     res.status(201).json({
       message: "Usuário criado com sucesso.",
-      _id: userId, token:
-      generateToken(userId)
+      _id: userId,
+      token: generateToken(userId)
     });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ errors: "Erro interno." });
+    res.status(500).json({ errors: ["Erro interno."] });
     return;
   }
 };
@@ -121,6 +120,10 @@ const updateUser = async (req, res) => {
   //copy the user without password
   const userRef = ref(db, `users/${reqUser.id}`);
   const userSnapshot = await get(userRef);
+  if(userSnapshot.val() === null) {
+    res.status(404).json({ errors: ["Usuário não encontrado."] });
+    return;
+  }
   const user = userSnapshot.val();
   delete user.password;
 
